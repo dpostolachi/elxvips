@@ -83,6 +83,7 @@ dependencies = [
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "libvips 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustler 0.21.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rustler_codegen 0.21.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
