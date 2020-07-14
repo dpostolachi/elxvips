@@ -74,7 +74,6 @@ fn process_image<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error>
                 Err( _ ) => 0,
             };
 
-            // let target_scale = target_width_i32 / target_height_i32;
             let max_size = width * ( width > height ) as i32 + height * ( height >= width ) as i32;
             let min_size = width * ( max_size == height ) as i32 + height * ( max_size == width ) as i32 + ( -max_size * ( height == width ) as i32 ); // TODO: cover rects
 
@@ -82,7 +81,6 @@ fn process_image<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error>
                 target_height_i32 * ( target_width_i32 < target_height_i32 ) as i32 +
                 max_size * ( target_width_i32 == target_height_i32 ) as i32;
 
-            // let scale = max_target as f64 / max_size as f64;
             let scale = ( max_target as f64 / width as f64 ) * ( max_target == target_width_i32 ) as i32 as f64 +
                 ( max_target as f64 / height as f64 ) * ( max_target == target_height_i32 ) as i32 as f64;
 
@@ -152,43 +150,10 @@ fn process_image<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error>
                 Err( _ ) => Ok( ( atoms::error(), "failed to resize image" ).encode( env ) )
             }
 
-
-            // if target_width_u32 < 1 {
-            //     target_width_u32 = match image_input.resize.width.decode::<&str>() {
-            //         Ok(&_) => width,
-            //         Err( _ ) => width,
-            //     };
-            // }
-
-            // let target_width = match image_input.resize.width.decode::<&'static str>()? {
-            //         // Term.Atom{} => 123,
-            //         "auto" => width,
-            // };
-
-            // let scale = width / 
-            // let (  )
-            // if max_size === width {
-            //     let scale = 
-            // } else {
-
-            // }
-
-            // Ok( ( atoms::ok(), target_width_i32 ).encode( env ) )
         },
         Err(_) => {
             Ok( ( atoms::error(), "failed to open image" ).encode( env ) )
         }
     }
 
-    // let image = VipsImage::new_from_file( &image_input.path ).unwrap();
-
-    // println!( ">>>{:?}", input);
-    // println!( ">>> called" );
-    // let output: String = args[1].decode()?;
-
-    // match resize_img( &input, &output ) {
-    //     Ok(_) => Ok( atoms::ok().encode(env) ),
-    //     Err(err) => Ok( ( atoms::error(), err ).encode(env) )
-    // }
-    // Ok( ( atoms::ok() ).encode( env ) )
 }
