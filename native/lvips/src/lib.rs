@@ -1,7 +1,7 @@
-extern crate rustler;
 #[macro_use]
 extern crate rustler_codegen;
 
+use lazy_static::lazy_static;
 use rustler::{Encoder, Env, Error, Term, Atom};
 use libvips::{ops, VipsImage, VipsApp};
 use libvips::{ops::{SmartcropOptions, Interesting}};
@@ -48,15 +48,23 @@ rustler::rustler_export_nifs! {
     [
         ("process_image", 1, process_image)
     ],
-    None
+    Some(on_load)
+}
+
+lazy_static! {
+    static ref APP: VipsApp = VipsApp::new("Test Libvips", false).expect("Cannot initialize libvips");
+}
+
+fn on_load(_env: Env, _info: Term) -> bool {
+    APP .concurrency_set(2);
+    true
 }
 
 fn process_image<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
-    let image_input: ImageFile = args[0].decode()?;
-    println!( ">>>{:?}", image_input);
-    let app = VipsApp::new("Test Libvips", false).expect("Cannot initialize libvips");
+    let jpeg_atom = Atom::from_str( env, "jpg" )?;
+    let png_atom = Atom::from_str( env, "png" )?;
 
-    app.concurrency_set(2);
+    let image_input: ImageFile = args[0].decode()?;
 
     match VipsImage::new_from_file( &image_input.path ) {
         Ok( image ) => {
@@ -108,28 +116,44 @@ fn process_image<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error>
 
                                 Ok( format ) => {
 
-                                    let jpg_atom = Atom::from_str( env, "jpg2" )?;
+                                    match format {
+                                        format if format == jpeg_atom => {
 
-                                    if format == jpg_atom {
-     
-                                        Ok( ( atoms::error(), "failed to resize image" ).encode( env ) )
-     
-                                    } else {
+                                            let options = ops::JpegsaveOptions {
+                                                q: image_input.save.quality as i32,
+                                                strip: image_input.save.strip,
+                                                optimize_coding: true,
+                                                optimize_scans: true,
+                                                interlace: true,
+                                                ..ops::JpegsaveOptions::default()
+                                            };
+    
+                                            match ops::jpegsave_with_opts(&cropped, &image_input.save.path, &options) {
+                                                Ok ( _ ) => Ok( ( atoms::ok() ).encode( env ) ),
+                                                Err( _ )  => Ok( ( atoms::error(), "Failed to save image" ).encode( env ) )
+                                            }
 
-                                        let options = ops::JpegsaveOptions {
-                                            q: image_input.save.quality as i32,
-                                            strip: image_input.save.strip,
-                                            optimize_coding: true,
-                                            optimize_scans: true,
-                                            interlace: true,
-                                            ..ops::JpegsaveOptions::default()
-                                        };
+                                        },
+                                        format if format == png_atom => {
 
-                                        match ops::jpegsave_with_opts(&cropped, &image_input.save.path, &options) {
-                                            Ok ( _ ) => Ok( ( atoms::ok() ).encode( env ) ),
-                                            Err( _ )  => Ok( ( atoms::error(), "Failed to save image" ).encode( env ) )
-                                        }
+                                            let options = ops::PngsaveOptions {
+                                                q: image_input.save.quality as i32,
+                                                strip: image_input.save.strip,
+                                                interlace: true,
+                                                ..ops::PngsaveOptions::default()
+                                            };
+    
+                                            match ops::pngsave_with_opts(&cropped, &image_input.save.path, &options){
+                                                Ok ( _ ) => Ok( ( atoms::ok() ).encode( env ) ),
+                                                Err( _ )  => Ok( ( atoms::error(), "Failed to save image" ).encode( env ) )
+                                            }
 
+                                        },
+                                        _ => {
+
+                                            Ok( ( atoms::error(), "format not supported" ).encode( env ) )
+
+                                        },
                                     }
 
                                 },
@@ -141,7 +165,7 @@ fn process_image<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error>
                         },
 
                         Err( _ ) => {
-                            println!("error: {}", app.error_buffer().unwrap());
+                            println!("error: {}", APP.error_buffer().unwrap());
                             Ok( ( atoms::error(), "failed to crop image" ).encode( env ) )
                         }
                     }

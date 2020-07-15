@@ -3,14 +3,18 @@ defmodule ElxvipsTest do
   import Elxvips
   # doctest Elxvips.Libvips
 
-  test "Resize" do
-    # assert :ok = resize( "test/input.png", "./test/output.jpg" )
-  end
-
-  test "Resize options" do
+  test "Resize png > jpg" do
     result = open( "test/input.png" )
     |> resize( height: 300, width: 250 )
     |> jpg( "test/output.jpg", quality: 100 )
+
+    assert :ok = result
+  end
+
+  test "Resize png > png" do
+    result = open( "test/input.png" )
+    |> resize( height: 300, width: 250 )
+    |> png( "test/output.png", quality: 100 )
 
     assert :ok = result
   end

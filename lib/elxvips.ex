@@ -64,6 +64,16 @@ defmodule Elxvips do
     end
   end
 
+  def png( image_file, path, opts \\ [] ) when is_binary( path ) do
+    with { :ok, image_file = %ImageFile{} } <- image_file do
+      image_file = %ImageFile{ image_file |
+        :save => Kernel.struct( %SaveOptions{}, opts ++ [ format: :png, path: path ] )
+      }
+
+      process_image( image_file )
+    end
+  end
+
 
 
 end
