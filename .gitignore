@@ -23,3 +23,5 @@ erl_crash.dump
 elxvips-*.tar
 
 target
+
+priv
