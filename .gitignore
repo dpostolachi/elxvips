@@ -24,4 +24,4 @@ elxvips-*.tar
 
 target
 
-priv
+/priv/
