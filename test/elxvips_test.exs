@@ -6,7 +6,7 @@ defmodule ElxvipsTest do
   test "Resize png > jpg" do
     result = open( "test/input.png" )
     |> resize( height: 300, width: 250 )
-    |> jpg( "test/output.jpg", quality: 100 )
+    |> jpg( "test/output.jpg", quality: 60 )
 
     assert :ok = result
   end
@@ -14,7 +14,14 @@ defmodule ElxvipsTest do
   test "Resize png > png" do
     result = open( "test/input.png" )
     |> resize( height: 300, width: 250 )
-    |> png( "test/output.png", quality: 100 )
+    |> png( "test/output.png", quality: 60 )
+
+    assert :ok = result
+  end
+
+  test "Original size" do
+    result = open( "test/input.png" )
+    |> png( "test/original.png", quality: 60 )
 
     assert :ok = result
   end

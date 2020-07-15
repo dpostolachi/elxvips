@@ -72,15 +72,21 @@ fn process_image<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error>
             let width = image.get_width();
             let height = image.get_height();
 
-            let target_width_i32 = match image_input.resize.width.decode::<i32>() {
+            let mut target_width_i32 = match image_input.resize.width.decode::<i32>() {
                 Ok( target_width ) => target_width,
                 Err( _ ) => 0,
             };
 
-            let target_height_i32 = match image_input.resize.height.decode::<i32>() {
+            let mut target_height_i32 = match image_input.resize.height.decode::<i32>() {
                 Ok( target_height ) => target_height,
                 Err( _ ) => 0,
             };
+
+            let original_size = target_width_i32 == 0 &&
+                target_height_i32 == 0;
+            
+            target_height_i32 = height * original_size as i32 + target_height_i32 * !original_size as i32;
+            target_width_i32 = width * original_size as i32 + target_width_i32 * !original_size as i32;
 
             let max_size = width * ( width > height ) as i32 + height * ( height >= width ) as i32;
             let min_size = width * ( max_size == height ) as i32 + height * ( max_size == width ) as i32 + ( -max_size * ( height == width ) as i32 ); // TODO: cover rects

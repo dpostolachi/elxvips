@@ -16,7 +16,7 @@ end
 
 defmodule SaveOptions do
   defstruct [
-    quality: 100,
+    quality: 90,
     format: :auto,
     strip: true,
     path: nil,
@@ -43,14 +43,19 @@ defmodule Elxvips do
   def resize( image_file, opts \\ [] ) do
     with { :ok, image_file = %ImageFile{} } <- image_file do
       { :ok, %ImageFile{ image_file |
-      :resize => Kernel.struct( %ResizeOptions{}, opts )
+      :resize => Kernel.struct( image_file.resize, opts )
     } }
     end
   end
 
   def open( path ) when is_binary( path ) do
     { :ok, %ImageFile{
-      :path => path
+      :path => path,
+      :resize => %ResizeOptions{
+        :width => :auto,
+        :height => :auto,
+        :fill => :auto,
+      }
     } }
   end
 
