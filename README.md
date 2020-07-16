@@ -1,10 +1,10 @@
 # Elxvips
 
-**TODO: Add description**
+Experimental bindings to libVips for image processing, since it's supposed to be [faster](https://github.com/libvips/libvips/wiki/Speed-and-memory-use) than GraphicsMagick/ImageMagick. It is based on the existing Rust [bindings](https://github.com/augustocdias/libvips-rust-bindings) to libVips. To make it work you will require libVips and the rust compiler.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
+If [available in Hex](https://hex.pm/packages/elxvips), the package can be installed
 by adding `elxvips` to your list of dependencies in `mix.exs`:
 
 ```elixir
@@ -13,6 +13,17 @@ def deps do
     {:elxvips, "~> 0.0.1"}
   ]
 end
+```
+
+## Example
+
+```elixir
+import Elxvips
+
+open( 'image.png ')
+|> resize( height: 100 )
+|> jpg( strip: true )
+:ok
 ```
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
