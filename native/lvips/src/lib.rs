@@ -1,16 +1,21 @@
 #[macro_use]
 extern crate rustler_codegen;
+extern crate num_cpus;
 
 use lazy_static::lazy_static;
 use rustler::{Encoder, Env, Error, Term, Atom};
 use libvips::{ops, VipsImage, VipsApp};
 use libvips::{ops::{SmartcropOptions, Interesting}};
+use std::env;
 
 mod atoms {
     rustler::rustler_atoms! {
         atom ok;
         atom error;
         atom auto;
+        atom none;
+        atom png;
+        atom jpg;
         //atom __true__ = "true";
         //atom __false__ = "false";
     }
@@ -42,148 +47,217 @@ struct ImageFile<'a> {
     pub save: SaveOptions<'a>,
 }
 
-
 rustler::rustler_export_nifs! {
     "Elixir.Elxvips",
     [
-        ("process_image", 1, process_image)
+        ("vips_process_image", 1, process_image),
+        ("vips_set_concurrency", 1, set_concurrency),
+        ("vips_get_image_sizes", 1, get_image_sizes),
+        // ("vips_get_image_sizes_from_bytes", 1, get_image_sizes_from_bytes),
+        ("vips_to_bytes", 1, to_bytes),
     ],
     Some(on_load)
 }
 
 lazy_static! {
     static ref APP: VipsApp = VipsApp::new("Test Libvips", false).expect("Cannot initialize libvips");
+    static ref JPEG_ATOM: Atom = atoms::jpg();
+    static ref PNG_ATOM: Atom = atoms::png();
+}
+
+fn image_into_bytes<'a>(image: VipsImage) -> Result<Vec<u8>, &'a str> {
+    match image.image_write_to_buffer( image.get_filename().unwrap() ) {
+        Ok( bytes ) => Ok( bytes ),
+        Err( _ ) => Err( "failed to convert image" )
+    }
+}
+
+fn image_from_bytes(buffer: &[u8]) -> Result<VipsImage, &str> {
+    match VipsImage::image_new_from_buffer(buffer, "") {
+        Ok( image ) => Ok( image ),
+        Err( _ ) => Err( "failed to create image from buffer" )
+    }
+}
+
+// fn get_image_sizes_from_bytes<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
+//     let result = match args[0].decode::<Vec<u8>>() {
+//         Ok( bytes ) => {
+//             match image_from_bytes( &bytes ) {
+//                 Ok( image ) => get
+//             }
+//         }
+//         Err( _ ) => Err( "failed to parse input data" )
+//     };
+
+    // Ok( () )
+    // match result {
+    //     Ok( bytes ) => Ok( ( atoms::ok(), bytes.encode( env ) ).encode( env ) ),
+    //     Err( error_str ) => Ok( ( atoms::error(), error_str ).encode( env ) )
+    // }
+// }
+
+fn to_bytes<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
+    let result = match args[0].decode::<String>() {
+        Ok( image_path ) => {
+            match VipsImage::new_from_file( &image_path ) {
+                Ok( image ) => image_into_bytes( image ),
+                Err( _ ) => Err( "failed to open image" )
+            }
+        },
+        Err( _ ) => Err( "failed to parse input data" )
+    };
+
+    match result {
+        Ok( bytes ) => Ok( ( atoms::ok(), bytes.encode( env ) ).encode( env ) ),
+        Err( error_str ) => Ok( ( atoms::error(), error_str ).encode( env ) )
+    }
 }
 
 fn on_load(_env: Env, _info: Term) -> bool {
-    APP .concurrency_set(2);
+    let concurrency = match env::var( "VIPS_CONCURRENCY" ) {
+        Ok( var ) => match var.parse::<u8>() {
+            Ok( num ) => num,
+            Err( _ ) => {
+                panic!( "Couldn't convert VIPS_CONCURRENCY={:?} to int", var )
+            }
+        },
+        Err(_) => num_cpus::get() as u8
+    };
+    APP.concurrency_set(concurrency as i32);
     true
 }
 
-fn process_image<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
-    let jpeg_atom = Atom::from_str( env, "jpg" )?;
-    let png_atom = Atom::from_str( env, "png" )?;
+fn get_image_sizes<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
+    let result = match args[0].decode::<String>() {
+        Ok( image_path ) => {
+            match VipsImage::new_from_file( &image_path ) {
+                Ok( image ) => Ok( [ image.get_width(), image.get_height() ] ),
+                Err(_) => Err( "failed to open image" )
+            }
+        },
+        Err( _ ) => Err( "failed to parse input data" )
+    };
 
-    let image_input: ImageFile = args[0].decode()?;
+    match result {
+        Ok( image_sizes ) => Ok( ( atoms::ok(), image_sizes.encode( env ) ).encode( env ) ),
+        Err( error_str ) => Ok( ( atoms::error(), error_str ).encode( env ) )
+    }
+}
 
-    match VipsImage::new_from_file( &image_input.path ) {
-        Ok( image ) => {
+fn set_concurrency<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
+    let concurrency: u8 = args[0].decode()?;
+    APP.concurrency_set( concurrency as i32 );
+    Ok( ( atoms::ok() ).encode( env ) )
+}
 
-            let width = image.get_width();
-            let height = image.get_height();
+fn resize_image<'a>(image: VipsImage, resize: &ResizeOptions<'a>) -> Result<VipsImage, &'a str> {
+    let source_width = image.get_width();
+    let source_height = image.get_height();
 
-            let mut target_width_i32 = match image_input.resize.width.decode::<i32>() {
-                Ok( target_width ) => target_width,
-                Err( _ ) => 0,
-            };
+    let target_width = match resize.width.decode::<i32>() {
+        Ok( target_width ) => target_width,
+        Err( _ ) => 0,
+    };
 
-            let mut target_height_i32 = match image_input.resize.height.decode::<i32>() {
-                Ok( target_height ) => target_height,
-                Err( _ ) => 0,
-            };
+    let target_height = match resize.height.decode::<i32>() {
+        Ok( target_height ) => target_height,
+        Err( _ ) => 0,
+    };
 
-            let original_size = target_width_i32 == 0 &&
-                target_height_i32 == 0;
-            
-            target_height_i32 = height * original_size as i32 + target_height_i32 * !original_size as i32;
-            target_width_i32 = width * original_size as i32 + target_width_i32 * !original_size as i32;
+    let original_size = ( target_width == 0 && target_height == 0 ) ||
+        ( target_width == source_width && target_height == source_height ); 
 
-            let max_size = width * ( width > height ) as i32 + height * ( height >= width ) as i32;
-            let min_size = width * ( max_size == height ) as i32 + height * ( max_size == width ) as i32 + ( -max_size * ( height == width ) as i32 ); // TODO: cover rects
+    if original_size {
+        Ok( image )
+    } else {
+        let target_ratio = target_width as f64 / target_height as f64;
+        let source_ratio = source_width as f64 / source_height as f64;
+        
+        let resize_width = 
+                source_width as f64 / ( source_height as f64 / target_height as f64 ) * ( source_ratio >= target_ratio ) as i32 as f64 +
+                target_width as f64 * ( source_ratio < target_ratio ) as i32 as f64;
 
-            let max_target = target_width_i32 * ( target_width_i32 > target_height_i32 ) as i32 +
-                target_height_i32 * ( target_width_i32 < target_height_i32 ) as i32 +
-                max_size * ( target_width_i32 == target_height_i32 ) as i32;
+        let scale = resize_width.ceil() / source_width as f64;
 
-            let scale = ( max_target as f64 / width as f64 ) * ( max_target == target_width_i32 ) as i32 as f64 +
-                ( max_target as f64 / height as f64 ) * ( max_target == target_height_i32 ) as i32 as f64;
+        match ops::resize( &image, scale ) {
+            Ok( resized ) => {
+                let options: SmartcropOptions = SmartcropOptions{
+                    interesting: Interesting::Centre,
+                };
 
-            let min_target = target_width_i32 as f64 * ( max_target == target_height_i32 ) as i32 as f64 +
-                target_height_i32 as f64 * ( max_target == target_width_i32 ) as i32 as f64 +
-                ( scale * min_size as f64 ) as f64 * ( target_width_i32 == 0 || target_height_i32 == 0 ) as i32 as f64;
+                match ops::smartcrop_with_opts( &resized, target_width as i32, target_height as i32, &options ) {
+                    Ok( cropped ) => Ok( cropped ),
+                    Err( _ ) => Err( "failed to crop image" )
+                }
+            },
+            Err( _ ) => Err( "failed to resize image" )
+        }
 
-            let ( crop_width, crop_height ) = (
-                max_target as f64 * ( max_target == target_width_i32 ) as i32 as f64 + min_target * ( max_target != target_width_i32 ) as i32 as f64,
-                max_target as f64 * ( max_target == target_height_i32 ) as i32 as f64 + min_target * ( max_target != target_height_i32 ) as i32 as f64
-            );
+    }
 
-            match ops::resize( &image, scale ) {
+}
 
-                Ok( resized ) => {
-
-                    let options: SmartcropOptions = SmartcropOptions{
-                        interesting: Interesting::Centre,
+fn save_image<'a>( image: &VipsImage, save_options: &SaveOptions<'a> ) -> Result<(), &'a str> {
+    match save_options.format.decode::<Atom>() {
+        Ok( format ) => {
+            match format {
+                format if format == atoms::jpg() => {
+                    let options = ops::JpegsaveOptions {
+                        q: save_options.quality as i32,
+                        strip: save_options.strip,
+                        optimize_coding: true,
+                        optimize_scans: true,
+                        interlace: true,
+                        ..ops::JpegsaveOptions::default()
                     };
 
-                    match ops::smartcrop_with_opts( &resized, crop_width as i32, crop_height as i32, &options ) {
-                        Ok( cropped ) => {
-
-                            match image_input.save.format.decode::<Atom>() {
-
-                                Ok( format ) => {
-
-                                    match format {
-                                        format if format == jpeg_atom => {
-
-                                            let options = ops::JpegsaveOptions {
-                                                q: image_input.save.quality as i32,
-                                                strip: image_input.save.strip,
-                                                optimize_coding: true,
-                                                optimize_scans: true,
-                                                interlace: true,
-                                                ..ops::JpegsaveOptions::default()
-                                            };
-    
-                                            match ops::jpegsave_with_opts(&cropped, &image_input.save.path, &options) {
-                                                Ok ( _ ) => Ok( ( atoms::ok() ).encode( env ) ),
-                                                Err( _ )  => Ok( ( atoms::error(), "Failed to save image" ).encode( env ) )
-                                            }
-
-                                        },
-                                        format if format == png_atom => {
-
-                                            let options = ops::PngsaveOptions {
-                                                q: image_input.save.quality as i32,
-                                                strip: image_input.save.strip,
-                                                interlace: true,
-                                                ..ops::PngsaveOptions::default()
-                                            };
-    
-                                            match ops::pngsave_with_opts(&cropped, &image_input.save.path, &options){
-                                                Ok ( _ ) => Ok( ( atoms::ok() ).encode( env ) ),
-                                                Err( _ )  => Ok( ( atoms::error(), "Failed to save image" ).encode( env ) )
-                                            }
-
-                                        },
-                                        _ => {
-
-                                            Ok( ( atoms::error(), "format not supported" ).encode( env ) )
-
-                                        },
-                                    }
-
-                                },
-
-                                Err( _ ) => Ok( ( atoms::error(), "format not supported" ).encode( env ) )
-
-                            }
-
-                        },
-
-                        Err( _ ) => {
-                            println!("error: {}", APP.error_buffer().unwrap());
-                            Ok( ( atoms::error(), "failed to crop image" ).encode( env ) )
-                        }
+                    match ops::jpegsave_with_opts(&image, &save_options.path, &options) {
+                        Ok ( _ ) => Ok( () ),
+                        Err( _ )  => Err( "failed to save image"  )
                     }
 
                 },
-                Err( _ ) => Ok( ( atoms::error(), "failed to resize image" ).encode( env ) )
+                format if format == atoms::png() => {
+                    let options = ops::PngsaveOptions {
+                        q: save_options.quality as i32,
+                        strip: save_options.strip,
+                        interlace: true,
+                        ..ops::PngsaveOptions::default()
+                    };
+
+                    match ops::pngsave_with_opts(&image, &save_options.path, &options){
+                        Ok ( _ ) => Ok( () ),
+                        Err( _ )  => Err( "failed to save image"  )
+                    }
+
+                },
+                _ => Err( "format not supported" )
             }
-
         },
-        Err(_) => {
-            Ok( ( atoms::error(), "failed to open image" ).encode( env ) )
-        }
+        Err( _ ) => Err( "format not supported" )
     }
+}
 
+fn process_image<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
+    let result = match args[0].decode::<ImageFile>() {
+        Ok( image_input ) => {
+            match VipsImage::new_from_file( &image_input.path ) {
+                Ok( image ) => {
+                    match resize_image( image, &image_input.resize ) {
+                        Ok( image ) => save_image( &image, &image_input.save ),
+                        Err( err ) => Err( err )
+                    }
+                },
+                Err(_) => {
+                    Err( "failed to open image" )
+                }
+            }
+        },
+        Err( _ ) => Err( "failed to parse input data" )
+    };
+
+    match result {
+        Ok( _ ) => Ok( ( atoms::ok() ).encode( env ) ),
+        Err( err ) => Ok( ( atoms::error(), err ).encode( env ) )
+    }
 }
