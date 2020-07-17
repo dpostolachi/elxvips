@@ -20,7 +20,7 @@ end
 ```elixir
 import Elxvips
 
-open( 'image.png ')
+open( 'image.png')
 |> resize( height: 100 )
 |> jpg( strip: true )
 :ok
