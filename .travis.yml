@@ -16,3 +16,4 @@ before_install:
   - sudo make install
   - curl https://sh.rustup.rs -sSf | sh -s -- -y
   - export PATH="$HOME/.cargo/bin:$PATH"
+  - cd ..
