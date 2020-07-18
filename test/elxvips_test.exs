@@ -9,8 +9,9 @@ defmodule ElxvipsTest do
 
   test "Resize png > jpg" do
     result = open( "test/input.png" )
+    |> as_bytes()
     |> resize( width: 250, height: 300 )
-    |> jpg( "test/output.jpg", quality: 60 )
+    |> jpg_bytes( quality: 60 )
     |> get_image_sizes()
 
     assert result == { :ok, [ 250, 300 ] }
@@ -18,19 +19,21 @@ defmodule ElxvipsTest do
 
   test "Resize png > png" do
     result = open( "test/input.png" )
+    |> as_bytes()
     |> resize( width: 300, height: 250 )
-    |> png( "test/output.png", quality: 60 )
+    |> png_bytes( quality: 60 )
     |> get_image_sizes()
 
     assert result == { :ok, [ 300, 250 ] }
   end
 
-  test "Original size" do
+  test "Original size with bytes" do
     input_image = open( "test/input.png" )
     { :ok, [ input_width, input_height ] } = get_image_sizes( input_image )
 
     { :ok, [ output_width, output_height ] } = input_image
-    |> png( "test/original.png", quality: 60 )
+    |> as_bytes()
+    |> png_bytes( quality: 60 )
     |> get_image_sizes()
 
     assert [ input_width, input_height ] == [ output_width, output_height ]
@@ -39,7 +42,8 @@ defmodule ElxvipsTest do
   test "Vertical image > horizontal" do
     result = open( "test/vertical.jpg" )
     |> resize( width: 200, height: 100 )
-    |> jpg( "test/vertical_1.png", quality: 60 )
+    |> as_bytes()
+    |> jpg_bytes( quality: 60 )
     |> get_image_sizes()
 
     assert result == { :ok, [ 200, 100 ] }
@@ -47,16 +51,24 @@ defmodule ElxvipsTest do
 
   test "Vertical image > vertical" do
     result = open( "test/vertical.jpg" )
+    |> as_bytes()
     |> resize( width: 100, height: 200 )
-    |> jpg( "test/vertical_2.png", quality: 60 )
+    |> jpg_bytes( quality: 60 )
     |> get_image_sizes()
 
     assert result == { :ok, [ 100, 200 ] }
   end
 
-  test "To bytes" do
-    bytes = to_bytes( "test/vertical.jpg" )
-    IO.puts "#{ inspect( bytes ) }"
+  test "Image > bytes > bytes" do
+    result = open( "test/vertical.jpg" )
+    |> as_bytes()
+    |> resize( height: 150, width: 150 )
+    |> jpg_bytes( strip: false )
+    |> resize( width: 100, height: 120 )
+    |> png_bytes()
+    |> get_image_sizes()
+
+    assert result == { :ok, [ 100, 120 ] }
   end
 
 end
