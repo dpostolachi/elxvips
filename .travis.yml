@@ -4,6 +4,6 @@ matrix:
     - otp_release: 22.0
       elixir: 1.10
 before_install:
-  - sudo apt install curl build-essential libvips libvips-dev
+  - sudo apt install -y curl build-essential libvips
   - curl https://sh.rustup.rs -sSf | sh -s -- -y
   - export PATH="$HOME/.cargo/bin:$PATH"
