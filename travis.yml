@@ -1,10 +1,8 @@
 language: elixir
 matrix:
   include:
-    - otp_release: 18.0
-      elixir: 1.2
     - otp_release: 22.0
-      elixir: 1.9
+      elixir: 1.10
 before_install:
   - sudo apt-get sudo apt install curl build-essential libvips libvips-dev
   - curl https://sh.rustup.rs -sSf | sh -s -- -y
