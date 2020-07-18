@@ -191,17 +191,25 @@ fn resize_image<'a>(image: VipsImage, resize: &ResizeOptions<'a>) -> Result<Vips
     };
 
     let original_size = ( target_width == 0 && target_height == 0 ) ||
-        ( target_width == source_width && target_height == source_height ); 
+        ( target_width == source_width && target_height == source_height ) ||
+        ( target_width == source_width && target_height == 0 ) ||
+        ( target_height == source_height && source_width == 0 );
 
     if original_size {
         Ok( image )
     } else {
-        let target_ratio = target_width as f64 / target_height as f64;
         let source_ratio = source_width as f64 / source_height as f64;
+
+        let target_width_f64 = ( target_height as f64 * source_width as f64 / source_height as f64 ) * ( target_width == 0 ) as i32 as f64 +
+            target_width as f64 * ( target_width != 0 ) as i32 as f64;
+        let target_height_f64 = ( target_width as f64 * source_height as f64 / source_width as f64 ) * ( target_height == 0 ) as i32 as f64 +
+            target_height as f64 * ( target_height != 0 ) as i32 as f64;
+
+        let target_ratio = target_width_f64 / target_height_f64;
         
         let resize_width = 
-                source_width as f64 * target_height as f64 / source_height as f64  * ( source_ratio >= target_ratio ) as i32 as f64 +
-                target_width as f64 * ( source_ratio < target_ratio ) as i32 as f64;
+                source_width as f64 * target_height_f64 / source_height as f64  * ( source_ratio >= target_ratio ) as i32 as f64 +
+                target_width_f64 * ( source_ratio < target_ratio ) as i32 as f64;
 
         let scale = resize_width.ceil() / source_width as f64;
 
@@ -211,7 +219,7 @@ fn resize_image<'a>(image: VipsImage, resize: &ResizeOptions<'a>) -> Result<Vips
                     interesting: Interesting::Centre,
                 };
 
-                match ops::smartcrop_with_opts( &resized, target_width as i32, target_height as i32, &options ) {
+                match ops::smartcrop_with_opts( &resized, target_width_f64 as i32, target_height_f64 as i32, &options ) {
                     Ok( cropped ) => Ok( cropped ),
                     Err( _ ) => Err( "failed to crop image" )
                 }

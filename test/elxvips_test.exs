@@ -71,4 +71,14 @@ defmodule ElxvipsTest do
     assert result == { :ok, [ 100, 120 ] }
   end
 
+  test "8K Image" do
+    result = open( "test/8k.jpg" )
+    |> as_bytes()
+    |> resize( height: 720 )
+    |> jpg_bytes( strip: true )
+    |> get_image_sizes()
+
+    assert result == { :ok, [ 1080, 720 ] }
+  end
+
 end
