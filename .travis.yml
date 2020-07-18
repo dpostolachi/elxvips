@@ -8,6 +8,6 @@ addons:
   apt:
     update: true
 before_install:
-  - sudo apt install -y curl build-essential libvips
+  - sudo apt install -y curl build-essential libvips libvips-dev
   - curl https://sh.rustup.rs -sSf | sh -s -- -y
   - export PATH="$HOME/.cargo/bin:$PATH"
