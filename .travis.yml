@@ -1,5 +1,5 @@
 language: elixir
-dist: xenial
+dist: focal
 matrix:
   include:
     - otp_release: 22.0
