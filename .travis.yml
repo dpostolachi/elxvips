@@ -17,3 +17,8 @@ before_install:
   - curl https://sh.rustup.rs -sSf | sh -s -- -y
   - export PATH="$HOME/.cargo/bin:$PATH"
   - cd ..
+  - export VIPSHOME=/usr/local
+  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$VIPSHOME/lib
+  - export PATH=$PATH:$VIPSHOME/bin
+  - export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$VIPSHOME/lib/pkgconfig
+  - export MANPATH=$MANPATH:$VIPSHOME/man
