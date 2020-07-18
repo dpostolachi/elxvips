@@ -1,4 +1,5 @@
 language: elixir
+dist: bionic
 matrix:
   include:
     - otp_release: 22.0
