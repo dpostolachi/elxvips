@@ -37,6 +37,7 @@ struct SaveOptions<'a> {
     strip: bool,
     path: &'a str,
     format: Term<'a>,
+    compression: u8,
 }
 
 #[module = "Elxvips.ImageFile"]
@@ -99,6 +100,7 @@ fn image_into_bytes<'a>(image: VipsImage, save_options: SaveOptions) -> Result<V
                     let options = ops::PngsaveBufferOptions {
                         q: save_options.quality as i32,
                         strip: save_options.strip,
+                        compression: save_options.compression as i32,
                         interlace: true,
                         ..ops::PngsaveBufferOptions::default()
                     };
@@ -254,6 +256,7 @@ fn save_image<'a>( image: &VipsImage, save_options: &SaveOptions<'a> ) -> Result
                 format if format == atoms::png() => {
                     let options = ops::PngsaveOptions {
                         q: save_options.quality as i32,
+                        compression: save_options.compression as i32,
                         strip: save_options.strip,
                         interlace: true,
                         ..ops::PngsaveOptions::default()

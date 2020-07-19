@@ -38,6 +38,7 @@ defmodule Elxvips.SaveOptions do
     format: :auto,
     strip: true,
     path: nil,
+    compression: 6,
   ]
 end
 
@@ -105,7 +106,7 @@ defmodule Elxvips do
   # new png image from image path
   defp to_png( image_file = %ImageFile{}, path, opts ) when is_binary( path ) do
     image_file = %ImageFile{ image_file |
-        :save => Kernel.struct( %SaveOptions{}, opts ++ [ format: :png, path: path ] )
+        :save => Kernel.struct( %SaveOptions{ :quality => 100 }, opts ++ [ format: :png, path: path ] )
     }
 
     with :ok <- vips_process_image_file( image_file ) do
@@ -120,7 +121,7 @@ defmodule Elxvips do
   defp to_png( image_bytes = %ImageBytes{ :path => path }, opts ) when is_binary( path )  do
     image_bytes = %ImageBytes{ image_bytes |
       :bytes => [], # pass empty bytes to rust
-      :save => Kernel.struct( %SaveOptions{}, opts ++ [ format: :png, path: "" ] ),
+      :save => Kernel.struct( %SaveOptions{ :quality => 100 }, opts ++ [ format: :png, path: "" ] ),
     }
 
     with { :ok, bytes } <- vips_process_image_file_bytes( image_bytes ) do
@@ -135,7 +136,7 @@ defmodule Elxvips do
   defp to_png( image_bytes = %ImageBytes{ :bytes => bytes }, opts ) when is_list( bytes ) do
     image_bytes = %ImageBytes{ image_bytes |
       :path => "", # pass empty string to rust
-      :save => Kernel.struct( %SaveOptions{}, opts ++ [ format: :png, path: "" ] ),
+      :save => Kernel.struct( %SaveOptions{ :quality => 100 }, opts ++ [ format: :png, path: "" ] ),
     }
 
     with { :ok, bytes } <- vips_process_image_bytes( image_bytes ) do
@@ -208,8 +209,8 @@ defmodule Elxvips do
   def jpg( { :ok, image_file = %ImageFile{} }, path, opts ), do: jpg( image_file, path, opts )
 
   @doc """
-  Will save the ImageFile in png format to a specified path. Accepts quality and strip options.
-  By default quality is set to 90, strip to true.
+  Will save the ImageFile in png format to a specified path. Accepts quality, compression(0-9) and strip options.
+  By default quality is set to 100, compression to 6, strip to true. Decreasing compression will speed up image saving.
 
   ## Examples
 
