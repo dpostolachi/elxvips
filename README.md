@@ -23,7 +23,7 @@ import Elxvips
 
 open( 'image.png')
 |> resize( height: 100 )
-|> jpg( strip: true )
+|> jpg( "output.jpg" strip: true )
 :ok
 ```
 
