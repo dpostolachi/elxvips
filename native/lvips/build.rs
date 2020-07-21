@@ -41,6 +41,7 @@ fn main() {
         .header("lib/wrapper.h")
         .clang_arg( "-I/usr/local/include/glib-2.0" )
         .clang_arg( "-I/usr/local/lib/glib-2.0/include/" )
+        .clang_arg( "-I/usr/lib/x86_64-linux-gnu/glib-2.0/include/" )
         .clang_arg( &glib2_path )
         .clang_arg( &glib2_conf_path )
         // Tell cargo to invalidate the built crate whenever any of the
