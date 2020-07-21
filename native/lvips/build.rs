@@ -39,8 +39,10 @@ fn main() {
         // The input header we would like to generate
         // bindings for.
         .header("lib/wrapper.h")
-        .clang_arg( glib2_path )
-        .clang_arg( glib2_conf_path )
+        .clang_arg( "-I/usr/local/include/glib-2.0" )
+        .clang_arg( "-I/usr/local/lib/glib-2.0/include/" )
+        .clang_arg( &glib2_path )
+        .clang_arg( &glib2_conf_path )
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed.
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
