@@ -18,6 +18,8 @@ fn main() {
         .collect();
     let ( glib2_path, glib2_conf_path ) = ( out_paths[0], out_paths[1] );
 
+    panic!( format!( "[0]={},[1]={}", glib2_path, glib2_conf_path ) );
+
     // Tell cargo to tell rustc to link the system bzip2
     // shared library.
     println!("cargo:rustc-link-lib=glib-2.0");
