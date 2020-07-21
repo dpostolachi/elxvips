@@ -22,6 +22,7 @@ fn main() {
         .clang_arg( "-I/usr/local/lib/glib-2.0/include/" )
         .clang_arg( "-I/usr/include/glib-2.0" )
         .clang_arg( "-I/usr/lib/glib-2.0/include/" )
+        .clang_arg( "-I/usr/lib/x86_64-linux-gnu/glib-2.0/include/" )
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed.
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
