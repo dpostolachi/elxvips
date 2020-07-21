@@ -7,7 +7,7 @@ use rustler::{Encoder, Env, Error, Term, Atom};
 use std::env;
 mod libvips;
 use libvips::{VipsImage};
-use libvips::save_options::{JpegSaveOptions, PngSaveOptions};
+use libvips::save_options::{JpegSaveOptions, PngSaveOptions, SmartcropOptions, Interesting};
 
 mod atoms {
     rustler::rustler_atoms! {
@@ -72,8 +72,11 @@ rustler::rustler_export_nifs! {
 }
 
 lazy_static! {
-    static ref JPEG_ATOM: Atom = atoms::jpg();
-    static ref PNG_ATOM: Atom = atoms::png();
+    static ref JPEG_ATOM: Atom                      = atoms::jpg();
+    static ref PNG_ATOM: Atom                       = atoms::png();
+    static ref SMART_CROP_OPTS: SmartcropOptions    = SmartcropOptions {
+        interesting: Interesting::Centre,
+    };
 }
 
 fn image_into_bytes<'a>(image: VipsImage, save_options: SaveOptions) -> Result<Vec<u8>, &'a str> {
@@ -218,10 +221,7 @@ fn resize_image<'a>(image: VipsImage, resize: &ResizeOptions<'a>) -> Result<Vips
         match image.resize( scale ) {
             Ok( resized ) => {
 
-                let left = source_width as f64 * scale - target_width_f64;
-                let top = source_height as f64 * scale - target_height_f64;
-
-                match resized.crop( ( left / 2 as f64 ) as u32 , ( top / 2 as f64 ) as u32, target_width_f64 as u32, target_height_f64 as u32) {
+                match resized.smart_crop_opts(target_width_f64 as i32, target_height_f64 as i32, &SMART_CROP_OPTS) {
                     Ok( cropped ) => Ok( cropped ),
                     Err( _ ) => Err( "failed to crop image" )
                 }

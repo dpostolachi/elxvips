@@ -1891,6 +1891,15 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
+    pub fn vips_smartcrop(
+        in_: *mut VipsImage,
+        out: *mut *mut VipsImage,
+        width: ::std::os::raw::c_int,
+        height: ::std::os::raw::c_int,
+        ...
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
     pub fn vips_resize(
         in_: *mut VipsImage,
         out: *mut *mut VipsImage,

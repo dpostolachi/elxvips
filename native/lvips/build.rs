@@ -1,8 +1,23 @@
 extern crate bindgen;
-
+use std::process::Command;
 use std::path::PathBuf;
 
 fn main() {
+
+    // Get clang arg to to include glib-2 from pkg-config command
+    // should return something like: -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
+    let pkg_config_out = Command::new("sh")
+        .arg("-c")
+        .arg("pkg-config --cflags glib-2.0")
+        .output()
+        .unwrap()
+        .stdout;
+
+    let out_str = String::from_utf8_lossy( &pkg_config_out );
+    let out_paths: Vec<&str> = out_str.split( ' ' )
+        .collect();
+    let ( glib2_path, glib2_conf_path ) = ( out_paths[0], out_paths[1] );
+
     // Tell cargo to tell rustc to link the system bzip2
     // shared library.
     println!("cargo:rustc-link-lib=glib-2.0");
@@ -18,11 +33,8 @@ fn main() {
         // The input header we would like to generate
         // bindings for.
         .header("lib/wrapper.h")
-        .clang_arg( "-I/usr/local/include/glib-2.0" )
-        .clang_arg( "-I/usr/local/lib/glib-2.0/include/" )
-        .clang_arg( "-I/usr/include/glib-2.0" )
-        .clang_arg( "-I/usr/lib/glib-2.0/include/" )
-        .clang_arg( "-I/usr/lib/x86_64-linux-gnu/glib-2.0/include/" )
+        .clang_arg( glib2_path )
+        .clang_arg( glib2_conf_path )
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed.
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
@@ -38,6 +50,7 @@ fn main() {
         .whitelist_function( "vips_jpegsave_buffer" )
         .whitelist_function( "vips_pngsave_buffer" )
         .whitelist_function( "vips_crop" )
+        .whitelist_function( "vips_smartcrop" )
         .whitelist_function( "vips_array_double_new" )
         .whitelist_function( "vips_resize" )
         .whitelist_var( "VipsInterpretation_VIPS_INTERPRETATION_XYZ" )

@@ -1,3 +1,4 @@
+#![allow(unused)]
 // copied from https://github.com/augustocdias/libvips-rust-bindings/blob/master/src/ops.rs
 
 /// Options for jpegsave operation
@@ -131,4 +132,44 @@ pub enum ForeignPngFilter {
     Paeth = 128,
     ///  `All` -> VIPS_FOREIGN_PNG_FILTER_ALL = 248
     All = 248,
+}
+
+#[derive(Copy, Clone, Debug)]
+pub enum Interesting {
+    ///  `None` -> VIPS_INTERESTING_NONE = 0
+    None = 0,
+    ///  `Centre` -> VIPS_INTERESTING_CENTRE = 1
+    Centre = 1,
+    ///  `Entropy` -> VIPS_INTERESTING_ENTROPY = 2
+    Entropy = 2,
+    ///  `Attention` -> VIPS_INTERESTING_ATTENTION = 3
+    Attention = 3,
+    ///  `Low` -> VIPS_INTERESTING_LOW = 4
+    Low = 4,
+    ///  `High` -> VIPS_INTERESTING_HIGH = 5
+    High = 5,
+    ///  `Last` -> VIPS_INTERESTING_LAST = 6
+    Last = 6,
+}
+
+/// Options for smartcrop operation
+#[derive(Clone, Debug)]
+pub struct SmartcropOptions {
+    /// interesting: `Interesting` -> How to measure interestingness
+    ///  `None` -> VIPS_INTERESTING_NONE = 0
+    ///  `Centre` -> VIPS_INTERESTING_CENTRE = 1
+    ///  `Entropy` -> VIPS_INTERESTING_ENTROPY = 2
+    ///  `Attention` -> VIPS_INTERESTING_ATTENTION = 3 [DEFAULT]
+    ///  `Low` -> VIPS_INTERESTING_LOW = 4
+    ///  `High` -> VIPS_INTERESTING_HIGH = 5
+    ///  `Last` -> VIPS_INTERESTING_LAST = 6
+    pub interesting: Interesting,
+}
+
+impl std::default::Default for SmartcropOptions {
+    fn default() -> Self {
+        SmartcropOptions {
+            interesting: Interesting::Attention,
+        }
+    }
 }
