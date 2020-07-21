@@ -8,18 +8,6 @@ addons:
   apt:
     update: true
 before_install:
-  - sudo apt install -y curl build-essential git libxml2-dev libfftw3-dev libmagickwand-dev libopenexr-dev liborc-0.4-0 gobject-introspection libgsf-1-dev libglib2.0-dev liborc-0.4-dev automake libtool swig gtk-doc-tools
-  - git clone https://github.com/libvips/libvips.git
-  - cd libvips
-  - git checkout tags/v8.9.2
-  - ./autogen.sh
-  - make
-  - sudo make install
+  - sudo apt install -y curl build-essential libglib2.0-dev libvips libvips-dev
   - curl https://sh.rustup.rs -sSf | sh -s -- -y
   - export PATH="$HOME/.cargo/bin:$PATH"
-  - cd ..
-  - export VIPSHOME=/usr/local
-  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$VIPSHOME/lib
-  - export PATH=$PATH:$VIPSHOME/bin
-  - export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$VIPSHOME/lib/pkgconfig
-  - export MANPATH=$MANPATH:$VIPSHOME/man
