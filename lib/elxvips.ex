@@ -54,10 +54,10 @@ defmodule Elxvips do
   # NIFs
   defp vips_set_concurrency(_a), do: :erlang.nif_error(:nif_not_loaded)
   defp vips_get_image_sizes(_a), do: :erlang.nif_error(:nif_not_loaded) # returns {:ok, { width, height } }
-  # defp vips_get_image_bytes_sizes(_a), do: :erlang.nif_error(:nif_not_loaded) # same but works with bytes
+  defp vips_get_image_bytes_sizes(_a), do: :erlang.nif_error(:nif_not_loaded) # same but works with bytes
   defp vips_process_image_file(_a), do: :erlang.nif_error(:nif_not_loaded) # applies processing from %ImageFile{}
   defp vips_process_image_file_bytes(_a), do: :erlang.nif_error(:nif_not_loaded) # applies processing from %ImageBytes{} created from image path
-  # defp vips_process_image_bytes(_a), do: :erlang.nif_error(:nif_not_loaded) # applies processing from %ImageBytes{} created from image bytes
+  defp vips_process_image_bytes(_a), do: :erlang.nif_error(:nif_not_loaded) # applies processing from %ImageBytes{} created from image bytes
 
   # creating new jpeg image from an existing image path
   defp to_jpg( image_file = %ImageFile{}, path, opts ) when is_binary( path ) do
@@ -89,20 +89,20 @@ defmodule Elxvips do
     end
   end
   # In case we have raw bytes
-  # defp to_jpg( image_bytes = %ImageBytes{ :bytes => bytes }, opts ) when is_list( bytes ) do
-  #   image_bytes = %ImageBytes{ image_bytes |
-  #     :path => "", # pass empty string to rust
-  #     :save => Kernel.struct( %SaveOptions{}, opts ++ [ format: :jpg, path: "" ] ),
-  #   }
+  defp to_jpg( image_bytes = %ImageBytes{ :bytes => bytes }, opts ) when is_list( bytes ) do
+    image_bytes = %ImageBytes{ image_bytes |
+      :path => "", # pass empty string to rust
+      :save => Kernel.struct( %SaveOptions{}, opts ++ [ format: :jpg, path: "" ] ),
+    }
 
-  #   with { :ok, bytes } <- vips_process_image_bytes( image_bytes ) do
-  #     { :ok, %ImageBytes{
-  #       :bytes => bytes,
-  #     } }
-  #   else
-  #     err -> err
-  #   end
-  # end
+    with { :ok, bytes } <- vips_process_image_bytes( image_bytes ) do
+      { :ok, %ImageBytes{
+        :bytes => bytes,
+      } }
+    else
+      err -> err
+    end
+  end
   # new png image from image path
   defp to_png( image_file = %ImageFile{}, path, opts ) when is_binary( path ) do
     image_file = %ImageFile{ image_file |
@@ -133,20 +133,20 @@ defmodule Elxvips do
     end
   end
   # In case we have raw bytes
-  # defp to_png( image_bytes = %ImageBytes{ :bytes => bytes }, opts ) when is_list( bytes ) do
-  #   image_bytes = %ImageBytes{ image_bytes |
-  #     :path => "", # pass empty string to rust
-  #     :save => Kernel.struct( %SaveOptions{ :quality => 100 }, opts ++ [ format: :png, path: "" ] ),
-  #   }
+  defp to_png( image_bytes = %ImageBytes{ :bytes => bytes }, opts ) when is_list( bytes ) do
+    image_bytes = %ImageBytes{ image_bytes |
+      :path => "", # pass empty string to rust
+      :save => Kernel.struct( %SaveOptions{ :quality => 100 }, opts ++ [ format: :png, path: "" ] ),
+    }
 
-  #   with { :ok, bytes } <- vips_process_image_bytes( image_bytes ) do
-  #     { :ok, %ImageBytes{
-  #       :bytes => bytes,
-  #     } }
-  #   else
-  #     err -> err
-  #   end
-  # end
+    with { :ok, bytes } <- vips_process_image_bytes( image_bytes ) do
+      { :ok, %ImageBytes{
+        :bytes => bytes,
+      } }
+    else
+      err -> err
+    end
+  end
 
   @doc """
   Applies resize options to an %ImageFile{} or %ImageBytes{}, accepts :width, :height and :type (not implemented yet).
@@ -272,7 +272,7 @@ defmodule Elxvips do
       {:ok, [640, 486]}
   """
   def get_image_sizes( path ) when is_binary( path ), do: vips_get_image_sizes( path )
-  # def get_image_sizes( bytes ) when is_list( bytes ), do: vips_get_image_bytes_sizes( bytes )
+  def get_image_sizes( bytes ) when is_list( bytes ), do: vips_get_image_bytes_sizes( bytes )
 
   def get_image_sizes( %ImageFile{ :path => path } ), do: get_image_sizes( path )
   def get_image_sizes( {:ok, %ImageFile{ :path => path } } ), do: get_image_sizes( path )

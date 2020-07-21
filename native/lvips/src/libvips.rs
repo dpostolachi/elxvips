@@ -1,7 +1,7 @@
 pub mod bindings;
 pub mod utils;
 pub mod save_options;
-use std::ffi::{CStr};
+use std::ffi::{CStr, c_void};
 use utils::{c_string, null};
 use lazy_static::lazy_static;
 use std::ffi::{CString};
@@ -64,6 +64,23 @@ impl VipsImage {
                 image: bindings::vips_image_new_from_file( filename.as_ptr(), utils::NULL )
             } )
         }
+    }
+    pub fn from_buffer( buffer: &[u8] ) -> Result<VipsImage, &str> {
+
+        let options = c_string("").unwrap();
+        unsafe {
+            let image = bindings::vips_image_new_from_buffer(
+                buffer.as_ptr() as *const c_void,
+                buffer.len() as u64,
+                options.as_ptr(),
+                utils::NULL
+            );
+
+            Ok( VipsImage{
+                image: image,
+            } )
+        }
+
     }
     pub fn crop( &self, left: u32, top: u32, width: u32, height: u32 ) -> Result<VipsImage, &str> {
         let input: *mut bindings::VipsImage = self.image;
@@ -322,4 +339,5 @@ impl VipsImage {
             }
         }
     }
+
 }

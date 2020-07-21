@@ -30,6 +30,7 @@ fn main() {
         .whitelist_function( "vips_error_buffer" )
         .whitelist_function( "vips_concurrency_set" )
         .whitelist_function( "vips_image_new_from_file" )
+        .whitelist_function( "vips_image_new_from_buffer" )
         .whitelist_function( "vips_image_get_width" )
         .whitelist_function( "vips_image_get_height" )
         .whitelist_function( "vips_jpegsave" )

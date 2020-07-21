@@ -1692,6 +1692,14 @@ extern "C" {
     pub fn vips_image_new_from_file(name: *const ::std::os::raw::c_char, ...) -> *mut VipsImage;
 }
 extern "C" {
+    pub fn vips_image_new_from_buffer(
+        buf: *const ::std::os::raw::c_void,
+        len: size_t,
+        option_string: *const ::std::os::raw::c_char,
+        ...
+    ) -> *mut VipsImage;
+}
+extern "C" {
     pub fn vips_error_buffer() -> *const ::std::os::raw::c_char;
 }
 #[repr(C)]
