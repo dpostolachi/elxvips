@@ -16,9 +16,13 @@ fn main() {
     let out_str = String::from_utf8_lossy( &pkg_config_out );
     let out_paths: Vec<&str> = out_str.split( ' ' )
         .collect();
-    let ( glib2_path, glib2_conf_path ) = ( out_paths[0], out_paths[1] );
+    let ( mut glib2_path, mut glib2_conf_path ) = (
+        out_paths[0].to_string(),
+        out_paths[1].to_string(),
+    );
 
-    panic!( format!( "[0]={},[1]={}", glib2_path, glib2_conf_path ) );
+    glib2_path.push_str( "/" );
+    glib2_conf_path.push_str( "/" );
 
     // Tell cargo to tell rustc to link the system bzip2
     // shared library.
