@@ -52,7 +52,6 @@ struct ImageFile<'a> {
 #[module = "Elxvips.ImageBytes"]
 #[derive(NifStruct, Debug)]
 struct ImageBytes<'a> {
-    pub path: &'a str,
     pub bytes: Vec<u8>,
     pub resize: ResizeOptions<'a>,
     pub save: SaveOptions<'a>,
@@ -61,9 +60,10 @@ struct ImageBytes<'a> {
 rustler::rustler_export_nifs! {
     "Elixir.Elxvips",
     [
-        ("vips_process_image_file", 1, process_image_file),
-        ("vips_process_image_file_bytes", 1, process_image_file_bytes),
-        ("vips_process_image_bytes", 1, process_image_bytes),
+        ("vips_process_file_to_file", 1, process_file_to_file),
+        ("vips_process_file_to_bytes", 1, process_file_to_bytes),
+        ("vips_process_bytes_to_bytes", 1, process_bytes_to_bytes),
+        ("vips_process_bytes_to_file", 1, process_bytes_to_file),
         ("vips_get_image_sizes", 1, get_image_sizes),
         ("vips_get_image_bytes_sizes", 1, get_image_bytes_sizes),
         ("vips_set_concurrency", 1, set_concurrency),
@@ -79,7 +79,7 @@ lazy_static! {
     };
 }
 
-fn image_into_bytes<'a>(image: VipsImage, save_options: SaveOptions) -> Result<Vec<u8>, &'a str> {
+fn image_into_bytes<'a>(image: VipsImage, save_options: SaveOptions) -> Result<Vec<u8>, String> {
     match save_options.format.decode::<Atom>() {
         Ok( format ) => {
             match format {
@@ -95,7 +95,7 @@ fn image_into_bytes<'a>(image: VipsImage, save_options: SaveOptions) -> Result<V
 
                     match image.jpeg_buffer_opts(&options) {
                         Ok ( bytes ) => Ok( bytes ),
-                        Err( _ )  => Err( "failed to save image"  )
+                        Err( err )  => Err( format!( "failed to save image: {}", err ) )
                     }
 
                 },
@@ -109,22 +109,24 @@ fn image_into_bytes<'a>(image: VipsImage, save_options: SaveOptions) -> Result<V
                     };
 
                     match image.png_buffer_opts(&options){
-                        Ok ( bytes ) => Ok( bytes ),
-                        Err( _ )  => Err( "failed to save image"  )
+                        Ok ( bytes ) => {
+                            Ok( bytes )
+                        }
+                        Err( err )  => Err( format!( "failed to save image: {}", err ) )
                     }
 
                 },
-                _ => Err( "format not supported" )
+                _ => Err( "format not supported".to_string() )
             }
         },
-        Err( _ ) => Err( "format not supported" )
+        Err( _ ) => Err( "format not supported".to_string() )
     }
 }
 
-fn image_from_bytes(buffer: &[u8]) -> Result<VipsImage, &str> {
+fn image_from_bytes(buffer: &[u8]) -> Result<VipsImage, String> {
     match VipsImage::from_buffer(buffer) {
         Ok( image ) => Ok( image ),
-        Err( _ ) => Err( "failed to create image from buffer" )
+        Err( err ) => Err( format!( "failed to create image from buffer: {}", err ) )
     }
 }
 
@@ -133,10 +135,10 @@ fn get_image_bytes_sizes<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>
         Ok( bytes ) => {
             match image_from_bytes( &bytes ) {
                 Ok( image ) => Ok( [ image.get_width(), image.get_height() ] ),
-                Err( _ ) => Err( "failed to read image from bytes" )
+                Err( err ) => Err( format!( "failed to read image from bytes: {}", err ) )
             }
         }
-        Err( _ ) => Err( "failed to parse input data" )
+        Err( _ ) => Err( "failed to parse input data".to_string() )
     };
     match result {
         Ok( bytes ) => Ok( ( atoms::ok(), bytes.encode( env ) ).encode( env ) ),
@@ -163,10 +165,10 @@ fn get_image_sizes<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Erro
         Ok( image_path ) => {
             match VipsImage::from_file( &image_path ) {
                 Ok( image ) => Ok( [ image.get_width(), image.get_height() ] ),
-                Err(_) => Err( "failed to open image" )
+                Err( err ) => Err( format!( "failed to open image: {}", err ) )
             }
         },
-        Err( _ ) => Err( "failed to parse input data" )
+        Err( _ ) => Err( "failed to parse input data".to_string() )
     };
 
     match result {
@@ -181,7 +183,7 @@ fn set_concurrency<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Erro
     Ok( ( atoms::ok() ).encode( env ) )
 }
 
-fn resize_image<'a>(image: VipsImage, resize: &ResizeOptions<'a>) -> Result<VipsImage, &'a str> {
+fn resize_image<'a>(image: VipsImage, resize: &ResizeOptions<'a>) -> Result<VipsImage, String> {
     let source_width = image.get_width();
     let source_height = image.get_height();
 
@@ -223,17 +225,17 @@ fn resize_image<'a>(image: VipsImage, resize: &ResizeOptions<'a>) -> Result<Vips
 
                 match resized.smart_crop_opts(target_width_f64 as i32, target_height_f64 as i32, &SMART_CROP_OPTS) {
                     Ok( cropped ) => Ok( cropped ),
-                    Err( _ ) => Err( "failed to crop image" )
+                    Err( err ) => Err( format!( "failed to crop image: {}", err ) )
                 }
             },
-            Err( _ ) => Err( "failed to resize image" )
+            Err( err ) => Err( format!( "failed to resize image: {}", err ) )
         }
 
     }
 
 }
 
-fn save_image<'a>( image: &VipsImage, save_options: &SaveOptions<'a> ) -> Result<(), &'a str> {
+fn save_image<'a>( image: &VipsImage, save_options: &SaveOptions<'a> ) -> Result<(), String> {
     match save_options.format.decode::<Atom>() {
         Ok( format ) => {
             match format {
@@ -248,8 +250,8 @@ fn save_image<'a>( image: &VipsImage, save_options: &SaveOptions<'a> ) -> Result
                     };
 
                     match image.save_jpeg_opts(&save_options.path, &options) {
-                        Ok ( _ ) => Ok( () ),
-                        Err( _ )  => Err( "failed to save image" )
+                        Ok ( () ) => Ok( () ),
+                        Err( err )  => Err( format!( "failed to save image: {}", err ) )
                     }
 
                 },
@@ -263,19 +265,19 @@ fn save_image<'a>( image: &VipsImage, save_options: &SaveOptions<'a> ) -> Result
                     };
 
                     match image.save_png_opts(&save_options.path, &options) {
-                        Ok ( _ ) => Ok( () ),
-                        Err( _ )  => Err( "failed to save image" )
+                        Ok ( () ) => Ok( () ),
+                        Err( err )  => Err( format!( "failed to save image: {}", err ) )
                     }
 
                 },
-                _ => Err( "format not supported" )
+                _ => Err( "format not supported".to_string() )
             }
         },
-        Err( _ ) => Err( "format not supported" )
+        Err( _ ) => Err( "format not supported".to_string() )
     }
 }
 
-fn process_image_file<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
+fn process_file_to_file<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
     let result = match args[0].decode::<ImageFile>() {
         Ok( image_input ) => {
             match VipsImage::from_file( &image_input.path ) {
@@ -285,12 +287,10 @@ fn process_image_file<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, E
                         Err( err ) => Err( err )
                     }
                 },
-                Err(_) => {
-                    Err( "failed to open image" )
-                }
+                Err( err ) => Err( format!( "failed to open image: {}", err ) )
             }
         },
-        Err( _ ) => Err( "failed to parse input data" )
+        Err( _ ) => Err( "failed to parse input data".to_string() )
     };
 
     match result {
@@ -299,8 +299,8 @@ fn process_image_file<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, E
     }
 }
 
-fn process_image_file_bytes<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
-    let result = match args[0].decode::<ImageBytes>() {
+fn process_file_to_bytes<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
+    let result = match args[0].decode::<ImageFile>() {
         Ok( image_input ) => {
             let save_options = image_input.save;
             let resize_options = image_input.resize;
@@ -312,12 +312,10 @@ fn process_image_file_bytes<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<
                         Err( err ) => Err( err )
                     }
                 },
-                Err(_) => {
-                    Err( "failed to open image" )
-                }
+                Err( err ) => Err( format!( "failed to open image: {}", err ) )
             }
         },
-        Err( _ ) => Err( "failed to parse input data" )
+        Err( _ ) => Err( "failed to parse input data".to_string() )
     };
 
     match result {
@@ -326,7 +324,7 @@ fn process_image_file_bytes<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<
     }
 }
 
-fn process_image_bytes<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
+fn process_bytes_to_bytes<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
     let result = match args[0].decode::<ImageBytes>() {
         Ok( image_input ) => {
             let resize_options = image_input.resize;
@@ -338,16 +336,38 @@ fn process_image_bytes<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, 
                         Err( err ) => Err( err )
                     }
                 },
-                Err(_) => {
-                    Err( "failed to open image" )
-                }
+                Err( err ) => Err( format!( "failed to open image: {}", err ) )
             }
         },
-        Err( _ ) => Err( "failed to parse input data" )
+        Err( _ ) => Err( "failed to parse input data".to_string() )
     };
 
     match result {
         Ok( bytes ) => Ok( ( atoms::ok(), bytes ).encode( env ) ),
+        Err( err ) => Ok( ( atoms::error(), err ).encode( env ) )
+    }
+}
+
+fn process_bytes_to_file<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
+    let result = match args[0].decode::<ImageBytes>() {
+        Ok( image_input ) => {
+            let resize_options = image_input.resize;
+            let save_options = image_input.save;
+            match VipsImage::from_buffer( &image_input.bytes ) {
+                Ok( image ) => {
+                    match resize_image( image, &resize_options ) {
+                        Ok( image ) => save_image( &image, &save_options ),
+                        Err( err ) => Err( err )
+                    }
+                },
+                Err( err ) => Err( format!( "failed to open image: {}", err ) )
+            }
+        },
+        Err( _ ) => Err( "failed to parse input data".to_string() )
+    };
+
+    match result {
+        Ok( () ) => Ok( ( atoms::ok() ).encode( env ) ),
         Err( err ) => Ok( ( atoms::error(), err ).encode( env ) )
     }
 }

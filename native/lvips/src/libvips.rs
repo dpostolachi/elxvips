@@ -61,7 +61,7 @@ impl VipsImage {
             bindings::vips_image_get_height( self.image )
         }
     }
-    pub fn from_file( path: &str ) -> Result<VipsImage, &str> {
+    pub fn from_file( path: &str ) -> Result<VipsImage, &'static str> {
         let filename = c_string( path ).unwrap();
         unsafe {
 
@@ -76,8 +76,7 @@ impl VipsImage {
             }
         }
     }
-    pub fn from_buffer( buffer: &[u8] ) -> Result<VipsImage, &str> {
-
+    pub fn from_buffer( buffer: &[u8] ) -> Result<VipsImage, &'static str> {
         let options = c_string("").unwrap();
         unsafe {
             let image = bindings::vips_image_new_from_buffer(
@@ -97,7 +96,7 @@ impl VipsImage {
         }
 
     }
-    pub fn crop( &self, left: i32, top: i32, width: i32, height: i32 ) -> Result<VipsImage, &str> {
+    pub fn crop( &self, left: i32, top: i32, width: i32, height: i32 ) -> Result<VipsImage, &'static str> {
         let input: *mut bindings::VipsImage = self.image;
         let mut output: *mut bindings::VipsImage = null();
         unsafe {
@@ -109,7 +108,7 @@ impl VipsImage {
             }
         }
     }
-    pub fn smart_crop( &self, width: i32, height: i32 ) -> Result<VipsImage, &str> {
+    pub fn smart_crop( &self, width: i32, height: i32 ) -> Result<VipsImage, &'static str> {
         let input: *mut bindings::VipsImage = self.image;
         let mut output: *mut bindings::VipsImage = null();
         unsafe {
@@ -122,7 +121,7 @@ impl VipsImage {
         } 
     }
 
-    pub fn smart_crop_opts( &self, width: i32, height: i32, options: &SmartcropOptions ) -> Result<VipsImage, &str> {
+    pub fn smart_crop_opts( &self, width: i32, height: i32, options: &SmartcropOptions ) -> Result<VipsImage, &'static str> {
         let input: *mut bindings::VipsImage = self.image;
         let mut output: *mut bindings::VipsImage = null();
         unsafe {
@@ -155,7 +154,7 @@ impl VipsImage {
             }
         }
     }
-    pub fn save_png_opts( &self, path: &str, options: &save_options::PngSaveOptions ) -> Result<(), &str> {
+    pub fn save_png_opts( &self, path: &str, options: &save_options::PngSaveOptions ) -> Result<(), &'static str> {
         let filename = c_string( path ).unwrap();
         let profile = c_string(&options.profile).unwrap();
 
@@ -197,7 +196,7 @@ impl VipsImage {
             }
         }
     }
-    pub fn save_jpeg_opts( &self, path: &str, options: &JpegSaveOptions ) -> Result<(), &str> {
+    pub fn save_jpeg_opts( &self, path: &str, options: &JpegSaveOptions ) -> Result<(), &'static str> {
         let filename = c_string( path ).unwrap();
         let profile = c_string(&options.profile).unwrap();
 
@@ -244,7 +243,7 @@ impl VipsImage {
         }
     }
 
-    pub fn jpeg_buffer_opts( &self, options: &JpegSaveOptions ) -> Result<Vec<u8>, &str> {
+    pub fn jpeg_buffer_opts( &self, options: &JpegSaveOptions ) -> Result<Vec<u8>, &'static str> {
         let mut buffer_buf_size: u64 = 0;
         let mut buffer_out = null();
         let profile = c_string(&options.profile).unwrap();
@@ -276,7 +275,7 @@ impl VipsImage {
         }
     }
 
-    pub fn png_buffer( &self ) -> Result<Vec<u8>, &str> {
+    pub fn png_buffer( &self ) -> Result<Vec<u8>, &'static str> {
         let mut buffer_buf_size: u64 = 0;
         let mut buffer_out = null();
 
@@ -293,7 +292,7 @@ impl VipsImage {
         }
     }
 
-    pub fn png_buffer_opts( &self, options: &PngSaveOptions ) -> Result<Vec<u8>, &str> {
+    pub fn png_buffer_opts( &self, options: &PngSaveOptions ) -> Result<Vec<u8>, &'static str> {
         let mut buffer_buf_size: u64 = 0;
         let mut buffer_out = null();
         let profile = c_string(&options.profile).unwrap();
@@ -318,13 +317,17 @@ impl VipsImage {
                 PAR_BACKGROUND.as_ptr(),     background_array,
                 utils::NULL
             ) {
-                0 => Ok( utils::get_buffer( buffer_out, buffer_buf_size ) ),
+                0 => {
+                    let buff = utils::get_buffer( buffer_out, buffer_buf_size );
+                    // Ok( utils::get_buffer( buffer_out, buffer_buf_size ) )
+                    Ok( buff )
+                },
                 _ => Err( error_buffer() )
             }
         }
     }
 
-    pub fn resize( &self, scale: f64 ) -> Result<VipsImage, &str> {
+    pub fn resize( &self, scale: f64 ) -> Result<VipsImage, &'static str> {
         unsafe {
             let mut output: *mut bindings::VipsImage = null();
 

@@ -21,9 +21,10 @@ end
 ```elixir
 import Elxvips
 
-open( 'image.png')
+from_file( "image.png" )
 |> resize( height: 100 )
 |> jpg( strip: true )
+|> to_file( "output.jpg" )
 :ok
 ```
 
