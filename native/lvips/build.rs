@@ -16,13 +16,10 @@ fn main() {
     let out_str = String::from_utf8_lossy( &pkg_config_out );
     let out_paths: Vec<&str> = out_str.split( ' ' )
         .collect();
-    let ( mut glib2_path, mut glib2_conf_path ) = (
-        out_paths[0].to_string(),
-        out_paths[1].to_string(),
+    let ( glib2_path, glib2_conf_path ) = (
+        out_paths[0],
+        out_paths[1],
     );
-
-    glib2_path.push_str( "/" );
-    glib2_conf_path.push_str( "/" );
 
     // Tell cargo to tell rustc to link the system bzip2
     // shared library.
@@ -35,13 +32,12 @@ fn main() {
     // The bindgen::Builder is the main entry point
     // to bindgen, and lets you build up options for
     // the resulting bindings.
-    panic!( "{}{}", glib2_path, glib2_conf_path );
     let bindings = bindgen::Builder::default()
         // The input header we would like to generate
         // bindings for.
         .header("lib/wrapper.h")
-        .clang_arg( &glib2_path )
-        .clang_arg( &glib2_conf_path )
+        .clang_arg( glib2_path )
+        .clang_arg( glib2_conf_path )
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed.
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
