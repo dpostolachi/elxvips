@@ -35,6 +35,7 @@ fn main() {
     // The bindgen::Builder is the main entry point
     // to bindgen, and lets you build up options for
     // the resulting bindings.
+    panic!( "{}{}", glib2_path, glib2_conf_path );
     let bindings = bindgen::Builder::default()
         // The input header we would like to generate
         // bindings for.
