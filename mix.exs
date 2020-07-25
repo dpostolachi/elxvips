@@ -4,7 +4,7 @@ defmodule Elxvips.MixProject do
   def project do
     [
       app: :elxvips,
-      version: "0.0.4",
+      version: "0.0.5",
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -18,7 +18,7 @@ defmodule Elxvips.MixProject do
   defp package do
     [
         name: "elxvips",
-        files: [ "lib", "mix.exs", "native/**/*.rs", "native/**/Cargo.lock", "native/**/Cargo.toml", "README.md" ],
+        files: [ "lib", "mix.exs", "native/lvips/build.rs", "native/lvips/src/**/*.rs", "native/lvips/lib/**/*.rs", "native/**/*.h", "native/**/Cargo.lock", "native/**/Cargo.toml", "README.md" ],
         licenses: [ "MIT" ],
         links: %{
             "GitHub" => "https://github.com/dpostolachi/elxvips"
