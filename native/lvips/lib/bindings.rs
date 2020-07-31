@@ -285,6 +285,9 @@ fn bindgen_test_layout__GObject() {
         )
     );
 }
+extern "C" {
+    pub fn g_object_unref(object: gpointer);
+}
 pub type VipsPel = ::std::os::raw::c_uchar;
 pub type VipsCallbackFn = ::std::option::Option<
     unsafe extern "C" fn(
