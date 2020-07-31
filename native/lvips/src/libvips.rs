@@ -56,6 +56,11 @@ impl VipsImage {
             bindings::vips_image_get_width( self.image )
         }
     }
+    pub fn destroy( &self ) {
+        unsafe{
+            bindings::g_object_unref( self.image as *mut c_void );
+        }
+    }
     pub fn get_height( &self ) -> i32 {
         unsafe {
             bindings::vips_image_get_height( self.image )
@@ -345,4 +350,10 @@ impl VipsImage {
         }
     }
 
+}
+
+impl Drop for VipsImage {
+    fn drop(&mut self) {
+        self.destroy()
+    }
 }
