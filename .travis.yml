@@ -18,3 +18,8 @@ before_install:
   - ./autogen.sh
   - make
   - sudo make install
+  - export VIPSHOME=/usr/local
+  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$VIPSHOME/lib
+  - export PATH=$PATH:$VIPSHOME/bin
+  - export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$VIPSHOME/lib/pkgconfig
+  - export MANPATH=$MANPATH:$VIPSHOME/man
