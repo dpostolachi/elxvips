@@ -1705,6 +1705,9 @@ extern "C" {
 extern "C" {
     pub fn vips_error_buffer() -> *const ::std::os::raw::c_char;
 }
+extern "C" {
+    pub fn vips_error_clear();
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct _VipsRegion {
