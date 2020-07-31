@@ -11,5 +11,5 @@ before_install:
   - sudo apt update && sudo apt install -y wget curl build-essential llvm clang libclang-dev libvips libvips-dev
   - curl https://sh.rustup.rs -sSf | sh -s -- -y
   - export PATH="$HOME/.cargo/bin:$PATH"
-  - wget https://packages.erlang-solutions.com/erlang-solutions_2.0_all.deb && dpkg -i erlang-solutions_2.0_all.deb
-  - sudo apt update && apt install -y esl-erlang elixir 
+  - wget https://packages.erlang-solutions.com/erlang-solutions_2.0_all.deb && sudo dpkg -i erlang-solutions_2.0_all.deb
+  - sudo apt update && sudo apt install -y esl-erlang elixir 
