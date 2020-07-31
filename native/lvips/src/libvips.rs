@@ -105,30 +105,24 @@ impl VipsImage {
         let input: *mut bindings::VipsImage = self.image;
         let mut output: *mut bindings::VipsImage = null();
         unsafe {
-            let result = match bindings::vips_crop( input, &mut output, left, top, width, height, utils::NULL ) {
-                0 => {
-                    Ok( VipsImage{
-                        image: output,
-                    } )
-                },
+            match bindings::vips_crop( input, &mut output, left, top, width, height, utils::NULL ) {
+                0 => Ok( VipsImage{
+                    image: output,
+                } ),
                 _ => Err( error_buffer() )
-            };
-            self.destroy();
-            result
+            }
         }
     }
     pub fn smart_crop( &self, width: i32, height: i32 ) -> Result<VipsImage, &'static str> {
         let input: *mut bindings::VipsImage = self.image;
         let mut output: *mut bindings::VipsImage = null();
         unsafe {
-            let result = match bindings::vips_smartcrop( input, &mut output, width, height, utils::NULL ) {
+            match bindings::vips_smartcrop( input, &mut output, width, height, utils::NULL ) {
                 0 => Ok( VipsImage{
                     image: output,
                 } ),
                 _ => Err( error_buffer() )
-            };
-            self.destroy();
-            result
+            }
         } 
     }
 
@@ -136,7 +130,7 @@ impl VipsImage {
         let input: *mut bindings::VipsImage = self.image;
         let mut output: *mut bindings::VipsImage = null();
         unsafe {
-            let result = match bindings::vips_smartcrop(
+            match bindings::vips_smartcrop(
                 input,
                 &mut output,
                 width,
@@ -148,25 +142,21 @@ impl VipsImage {
                     image: output,
                 } ),
                 _ => Err( error_buffer() )
-            };
-            self.destroy();
-            result
+            }
         }  
     }
 
     pub fn save_png( &self, path: &str ) -> Result<(), &str> {
         let filename = c_string( path ).unwrap();
         unsafe {
-            let result = match bindings::vips_pngsave(
+            match bindings::vips_pngsave(
                 self.image as *mut bindings::_VipsImage,
                 filename.as_ptr(),
                 utils::NULL
             ) {
                 0 => Ok( () ),
                 _ => Err( error_buffer() )
-            };
-            self.destroy();
-            result
+            }
         }
     }
     pub fn save_png_opts( &self, path: &str, options: &save_options::PngSaveOptions ) -> Result<(), &'static str> {
@@ -175,7 +165,8 @@ impl VipsImage {
 
         unsafe {
             let background_array = bindings::vips_array_double_new(options.background.as_ptr(), options.background.len() as i32);
-            let result = match bindings::vips_pngsave(
+
+            match bindings::vips_pngsave(
                 self.image as *mut bindings::_VipsImage,
                 filename.as_ptr(),
                 PAR_COMPRESSION.as_ptr(),        options.compression,
@@ -193,26 +184,21 @@ impl VipsImage {
             ) {
                 0 => Ok( () ),
                 _ => Err( error_buffer() )
-            };
-
-            self.destroy();
-            result
+            }
         }
     }
     pub fn save_jpeg( &self, path: &str ) -> Result<(), &str> {
         let filename = c_string( path ).unwrap();
 
         unsafe {
-            let result = match bindings::vips_jpegsave(
+            match bindings::vips_jpegsave(
                 self.image as *mut bindings::_VipsImage,
                 filename.as_ptr(),
                 utils::NULL
             ) {
                 0 => Ok( () ),
                 _ => Err( error_buffer() )
-            };
-            self.destroy();
-            result
+            }
         }
     }
     pub fn save_jpeg_opts( &self, path: &str, options: &JpegSaveOptions ) -> Result<(), &'static str> {
@@ -221,7 +207,8 @@ impl VipsImage {
 
         unsafe {
             let background_array = bindings::vips_array_double_new(options.background.as_ptr(), options.background.len() as i32);
-            let result = match bindings::vips_jpegsave(
+
+            match bindings::vips_jpegsave(
                 self.image as *mut bindings::_VipsImage,
                 filename.as_ptr(),
                 PAR_PAGE_HEIGHT.as_ptr(),            options.page_height,
@@ -240,10 +227,7 @@ impl VipsImage {
             ) {
                 0 => Ok( () ),
                 _ => Err( error_buffer() )
-            };
-
-            self.destroy();
-            result
+            }
         }
     }
 
@@ -252,7 +236,7 @@ impl VipsImage {
         let mut buffer_out = null();
 
         unsafe {
-            let result = match bindings::vips_jpegsave_buffer(
+            match bindings::vips_jpegsave_buffer(
                 self.image as *mut bindings::_VipsImage,
                 &mut buffer_out,
                 &mut buffer_buf_size,
@@ -260,10 +244,7 @@ impl VipsImage {
             ) {
                 0 => Ok( utils::get_buffer( buffer_out, buffer_buf_size ) ),
                 _ => Err( error_buffer() )
-            };
-
-            self.destroy();
-            result
+            }
         }
     }
 
@@ -274,7 +255,8 @@ impl VipsImage {
 
         unsafe {
             let background_array = bindings::vips_array_double_new(options.background.as_ptr(), options.background.len() as i32);
-            let result = match bindings::vips_jpegsave_buffer(
+
+            match bindings::vips_jpegsave_buffer(
                 self.image as *mut bindings::_VipsImage,
                 &mut buffer_out,
                 &mut buffer_buf_size,
@@ -294,10 +276,7 @@ impl VipsImage {
             ) {
                 0 => Ok( utils::get_buffer( buffer_out, buffer_buf_size ) ),
                 _ => Err( error_buffer() )
-            };
-            
-            self.destroy();
-            result
+            }
         }
     }
 
@@ -306,7 +285,7 @@ impl VipsImage {
         let mut buffer_out = null();
 
         unsafe {
-            let result = match bindings::vips_pngsave_buffer(
+            match bindings::vips_pngsave_buffer(
                 self.image as *mut bindings::_VipsImage,
                 &mut buffer_out,
                 &mut buffer_buf_size,
@@ -314,10 +293,7 @@ impl VipsImage {
             ) {
                 0 => Ok( utils::get_buffer( buffer_out, buffer_buf_size ) ),
                 _ => Err( error_buffer() )
-            };
-
-            self.destroy();
-            result
+            }
         }
     }
 
@@ -328,7 +304,8 @@ impl VipsImage {
 
         unsafe {
             let background_array = bindings::vips_array_double_new(options.background.as_ptr(), options.background.len() as i32);
-            let result = match bindings::vips_pngsave_buffer(
+
+            match bindings::vips_pngsave_buffer(
                 self.image as *mut bindings::_VipsImage,
                 &mut buffer_out,
                 &mut buffer_buf_size,
@@ -351,17 +328,15 @@ impl VipsImage {
                     Ok( buff )
                 },
                 _ => Err( error_buffer() )
-            };
-
-            self.destroy();
-            result
+            }
         }
     }
 
     pub fn resize( &self, scale: f64 ) -> Result<VipsImage, &'static str> {
         unsafe {
             let mut output: *mut bindings::VipsImage = null();
-            let result = match bindings::vips_resize(
+
+            match bindings::vips_resize(
                 self.image as *mut bindings::_VipsImage,
                 &mut output,
                 scale,
@@ -371,11 +346,14 @@ impl VipsImage {
                     image: output,
                 } ),
                 _ => Err( error_buffer() )
-            };
-
-            self.destroy();
-            result
+            }
         }
     }
 
+}
+
+impl Drop for VipsImage {
+    fn drop(&mut self) {
+        self.destroy()
+    }
 }
