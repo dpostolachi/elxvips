@@ -2,7 +2,6 @@
 extern crate rustler_codegen;
 extern crate num_cpus;
 
-use lazy_static::lazy_static;
 use rustler::{Encoder, Env, Error, Term, Atom};
 use std::env;
 mod libvips;
@@ -71,13 +70,9 @@ rustler::rustler_export_nifs! {
     Some(on_load)
 }
 
-lazy_static! {
-    static ref JPEG_ATOM: Atom                      = atoms::jpg();
-    static ref PNG_ATOM: Atom                       = atoms::png();
-    static ref SMART_CROP_OPTS: SmartcropOptions    = SmartcropOptions {
-        interesting: Interesting::Centre,
-    };
-}
+static SMART_CROP_OPTS: SmartcropOptions = SmartcropOptions {
+    interesting: Interesting::Centre,
+};
 
 fn image_into_bytes<'a>(image: VipsImage, save_options: SaveOptions) -> Result<Vec<u8>, String> {
     match save_options.format.decode::<Atom>() {

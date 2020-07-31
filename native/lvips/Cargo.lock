@@ -213,7 +213,6 @@ name = "lvips"
 version = "0.1.0"
 dependencies = [
  "bindgen 0.53.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "num_cpus 1.13.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustler 0.21.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustler_codegen 0.21.1 (registry+https://github.com/rust-lang/crates.io-index)",

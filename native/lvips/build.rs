@@ -43,6 +43,7 @@ fn main() {
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         // Finish the builder and generate the bindings.
         .whitelist_function( "vips_error_buffer" )
+        .whitelist_function( "vips_error_clear" )
         .whitelist_function( "vips_concurrency_set" )
         .whitelist_function( "vips_image_new_from_file" )
         .whitelist_function( "vips_image_new_from_buffer" )
