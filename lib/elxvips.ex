@@ -60,6 +60,9 @@ defmodule Elxvips do
 
   # creating new image from an existing image path
   defp process_to_file( image_file = %ImageFile{}, path ) when is_binary( path ) do
+    image_file = %ImageFile{ image_file |
+      :save => Kernel.struct( image_file.save, [ path: path ] )
+    }
     with :ok <- vips_process_file_to_file( image_file ) do
       { :ok, %ImageFile{
         :path => path,
