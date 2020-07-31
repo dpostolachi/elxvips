@@ -8,7 +8,8 @@ addons:
   apt:
     update: true
 before_install:
-  - sudo apt install -y curl build-essential libglib2.0-dev libvips libvips-dev libvips-tools gobject-introspection
+  - sudo apt update && apt install -y wget curl build-essential llvm clang libclang-dev libvips libvips-dev
   - curl https://sh.rustup.rs -sSf | sh -s -- -y
   - export PATH="$HOME/.cargo/bin:$PATH"
-  - pkg-config --cflags glib-2.0
+  - wget https://packages.erlang-solutions.com/erlang-solutions_2.0_all.deb && dpkg -i erlang-solutions_2.0_all.deb
+  - sudo apt update && apt install -y esl-erlang elixir 

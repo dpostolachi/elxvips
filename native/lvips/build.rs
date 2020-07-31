@@ -17,8 +17,8 @@ fn main() {
     let out_paths: Vec<&str> = out_str.split( ' ' )
         .collect();
     let ( glib2_path, glib2_conf_path ) = (
-        out_paths[0],
-        out_paths[1],
+        out_paths[0].trim(),
+        out_paths[1].trim(),
     );
 
     // Tell cargo to tell rustc to link the system bzip2

@@ -5,7 +5,7 @@ defmodule Elxvips.MixProject do
     [
       app: :elxvips,
       version: "0.0.4",
-      elixir: "~> 1.10",
+      elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       compilers: [:rustler] ++ Mix.compilers(),
