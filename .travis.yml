@@ -23,3 +23,4 @@ before_install:
   - export PATH=$PATH:$VIPSHOME/bin
   - export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$VIPSHOME/lib/pkgconfig
   - export MANPATH=$MANPATH:$VIPSHOME/man
+  - cd ..
