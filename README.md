@@ -11,7 +11,7 @@ by adding `elxvips` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:elxvips, "~> 0.0.6"}
+    {:elxvips, "~> 0.0.7"}
   ]
 end
 ```
