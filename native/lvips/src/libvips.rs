@@ -50,24 +50,30 @@ impl VipsImage {
             bindings::vips_image_get_height( self.image )
         }
     }
-    pub fn get_format( &self ) -> Result<VipsFormat, String> {
+    pub fn get_string( &self, vips_string: &CStr ) -> Result<String, String> {
         unsafe {
             let params = globals::get_params().unwrap();
             let mut out = null();
 
-            match bindings::vips_image_get_as_string( self.image, params.vips_loader.as_ptr(), &mut out ) {
+            match bindings::vips_image_get_as_string( self.image, vips_string.as_ptr(), &mut out ) {
                 0 => {
-                    let string = CStr::from_ptr( out );
-                    println!( "{}", string.to_str().unwrap() );
-                    // Ok (string.to_str().unwrap() )
-                    match string.to_str().unwrap() {
-                        "jpegload"  | "jpegload_buffer" => Ok( VipsFormat::JPEG ),
-                        "pngload"   | "pngload_buffer" => Ok( VipsFormat::PNG ),
-                        _ => Err( "unknown format".to_string() )
-                    }
+                    // Note: string from bindings must be owned and received copy must
+                    // be freed
+                    let string = CStr::from_ptr( out ).to_str().unwrap().to_string();
+                    bindings::g_free( out as *mut c_void );
+                    Ok( string )
                 },
                 _ => Err( error_buffer() )
             }
+        }
+    }
+    pub fn get_format( &self ) -> Result<VipsFormat, String> {
+        let params = globals::get_params().unwrap();
+        let format_string: &str = &self.get_string( &params.vips_loader ).unwrap();
+        match format_string {
+            "jpegload"  | "jpegload_buffer" => Ok( VipsFormat::JPEG ),
+            "pngload"   | "pngload_buffer" => Ok( VipsFormat::PNG ),
+            _ => Err( "unknown format".to_string() )
         }
     }
     pub fn from_file( path: &str ) -> Result<VipsImage, String> {
@@ -85,19 +91,7 @@ impl VipsImage {
             }
         }
     }
-    // pub fn to_file( &self, path: &str ) -> Result<(), String> {
-    //     match( self.get_format().unwrap() ) {
-    //         VipsFormat::PNG => self.save_png_opts( path, PngSaveOptions::default() ),
-    //         VipsFormat::JPEG => self.save_jpeg_opts( path, JpegSaveOptions::default() )
-    //     }
-    // }
-    // pub fn to_buffer( &self ) -> Result<Vec<u8>, String> {
-    //     match( self.get_format().unwrap() ) {
-    //         VipsFormat::PNG => self.png_buffer_opts( PngSaveOptions::default() ),
-    //         VipsFormat::JPEG => self.jpeg_buffer_opts( JpegSaveOptions::default() )
-    //     }
 
-    // }
     pub fn from_buffer( buffer: &[u8] ) -> Result<VipsImage, String> {
         let options = c_string("").unwrap();
         unsafe {

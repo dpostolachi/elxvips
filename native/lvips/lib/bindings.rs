@@ -57,6 +57,9 @@ pub struct _GData {
     _unused: [u8; 0],
 }
 pub type GData = _GData;
+extern "C" {
+    pub fn g_free(mem: gpointer);
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct _GHashTable {

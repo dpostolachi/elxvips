@@ -59,6 +59,7 @@ fn main() {
         .whitelist_function( "vips_resize" )
         .whitelist_function( "vips_image_get_as_string" )
         .whitelist_function( "g_object_unref" )
+        .whitelist_function( "g_free()" )
         .whitelist_var( "VipsInterpretation_VIPS_INTERPRETATION_XYZ" )
         .whitelist_type( "_VipsImage" )
         .generate()
