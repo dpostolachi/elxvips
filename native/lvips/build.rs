@@ -57,6 +57,7 @@ fn main() {
         .whitelist_function( "vips_smartcrop" )
         .whitelist_function( "vips_array_double_new" )
         .whitelist_function( "vips_resize" )
+        .whitelist_function( "vips_image_get_as_string" )
         .whitelist_function( "g_object_unref" )
         .whitelist_var( "VipsInterpretation_VIPS_INTERPRETATION_XYZ" )
         .whitelist_type( "_VipsImage" )

@@ -8,6 +8,11 @@ use utils::{c_string, null};
 use std::ffi::{CString};
 use save_options::{JpegSaveOptions, PngSaveOptions, SmartcropOptions};
 
+pub enum VipsFormat {
+    PNG,
+    JPEG,
+}
+
 pub fn error_buffer() -> String {
     unsafe {
         let error = CStr::from_ptr( bindings::vips_error_buffer() )
@@ -45,6 +50,26 @@ impl VipsImage {
             bindings::vips_image_get_height( self.image )
         }
     }
+    pub fn get_format( &self ) -> Result<VipsFormat, String> {
+        unsafe {
+            let params = globals::get_params().unwrap();
+            let mut out = null();
+
+            match bindings::vips_image_get_as_string( self.image, params.vips_loader.as_ptr(), &mut out ) {
+                0 => {
+                    let string = CStr::from_ptr( out );
+                    println!( "{}", string.to_str().unwrap() );
+                    // Ok (string.to_str().unwrap() )
+                    match string.to_str().unwrap() {
+                        "jpegload"  | "jpegload_buffer" => Ok( VipsFormat::JPEG ),
+                        "pngload"   | "pngload_buffer" => Ok( VipsFormat::PNG ),
+                        _ => Err( "unknown format".to_string() )
+                    }
+                },
+                _ => Err( error_buffer() )
+            }
+        }
+    }
     pub fn from_file( path: &str ) -> Result<VipsImage, String> {
         let filename = c_string( path ).unwrap();
         unsafe {
@@ -60,6 +85,19 @@ impl VipsImage {
             }
         }
     }
+    // pub fn to_file( &self, path: &str ) -> Result<(), String> {
+    //     match( self.get_format().unwrap() ) {
+    //         VipsFormat::PNG => self.save_png_opts( path, PngSaveOptions::default() ),
+    //         VipsFormat::JPEG => self.save_jpeg_opts( path, JpegSaveOptions::default() )
+    //     }
+    // }
+    // pub fn to_buffer( &self ) -> Result<Vec<u8>, String> {
+    //     match( self.get_format().unwrap() ) {
+    //         VipsFormat::PNG => self.png_buffer_opts( PngSaveOptions::default() ),
+    //         VipsFormat::JPEG => self.jpeg_buffer_opts( JpegSaveOptions::default() )
+    //     }
+
+    // }
     pub fn from_buffer( buffer: &[u8] ) -> Result<VipsImage, String> {
         let options = c_string("").unwrap();
         unsafe {

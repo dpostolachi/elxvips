@@ -23,6 +23,8 @@ pub struct GlobalsParams {
     pub dither:                 CString,
 
     pub interesting:            CString,
+
+    pub vips_loader:            CString,
  
 }
 
@@ -49,6 +51,8 @@ impl Default for GlobalsParams {
             dither:                 c_string( "dither" ).unwrap(),
 
             interesting:            c_string( "interesting" ).unwrap(),
+
+            vips_loader:            c_string( "vips-loader" ).unwrap(),
         }
     }
 }

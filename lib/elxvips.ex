@@ -6,6 +6,16 @@ defmodule Elxvips.ResizeOptions do
   ]
 end
 
+defmodule Elxvips.SaveOptions do
+  defstruct [
+    quality: 90,
+    format: :auto,
+    strip: true,
+    path: "",
+    compression: 6,
+  ]
+end
+
 defmodule Elxvips.ImageFile do
   defstruct [
     path: :nil,
@@ -14,7 +24,7 @@ defmodule Elxvips.ImageFile do
       :height => :auto,
       :resize_type => :auto,
     },
-    save: nil
+    save: %Elxvips.SaveOptions{}
   ]
 end
 
@@ -26,17 +36,7 @@ defmodule Elxvips.ImageBytes do
       :height => :auto,
       :resize_type => :auto,
     },
-    save: :nil,
-  ]
-end
-
-defmodule Elxvips.SaveOptions do
-  defstruct [
-    quality: 90,
-    format: :auto,
-    strip: true,
-    path: nil,
-    compression: 6,
+    save: %Elxvips.SaveOptions{},
   ]
 end
 
@@ -108,7 +108,7 @@ defmodule Elxvips do
   Applies resize options to an %ImageFile{} or %ImageBytes{}, accepts :width, :height and :type (not implemented yet).
   If no width or height is specified dimensions are calculated from the input image.
   Empty resize( no :width and no :height) will produce an image with the dimensions as the original one.
-  
+
   ## Examples
       iex> Elxvips.from_file( "test/input.png" )
       iex> |> Elxvips.resize( width: 300 )
@@ -154,7 +154,7 @@ defmodule Elxvips do
   ## Examples
 
       iex> Elxvips.open( "/path/input.png" )
-      iex> |> Elxvips.jpg( "/path/output.jpg", strip: true, quality: 72 ) 
+      iex> |> Elxvips.jpg( "/path/output.jpg", strip: true, quality: 72 )
       { :ok, %ImageFile{ :path => "/path/output.jpg", ... } }
 
   """
@@ -171,7 +171,7 @@ defmodule Elxvips do
   ## Examples
 
       iex> Elxvips.open( "/path/input.jpg" )
-      iex> |> Elxvips.png( "/path/output.png", strip: true, quality: 72 ) 
+      iex> |> Elxvips.png( "/path/output.png", strip: true, quality: 72 )
       { :ok, %ImageFile{ :path => "/path/output.png", ... } }
   """
   def png( image, opts \\ [] )

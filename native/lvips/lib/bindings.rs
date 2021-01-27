@@ -2,7 +2,7 @@
 
 pub type size_t = ::std::os::raw::c_ulong;
 pub type guint32 = ::std::os::raw::c_uint;
-pub type gint64 = ::std::os::raw::c_longlong;
+pub type gint64 = ::std::os::raw::c_long;
 pub type gsize = ::std::os::raw::c_ulong;
 pub type gint = ::std::os::raw::c_int;
 pub type gboolean = gint;
@@ -296,6 +296,7 @@ pub type VipsCallbackFn = ::std::option::Option<
     ) -> ::std::os::raw::c_int,
 >;
 pub type VipsImage = _VipsImage;
+pub type VipsRegion = _VipsRegion;
 pub type VipsObject = _VipsObject;
 pub type VipsArgumentTable = GHashTable;
 #[repr(C)]
@@ -1017,14 +1018,14 @@ pub const VipsCoding_VIPS_CODING_LAST: VipsCoding = 7;
 pub type VipsCoding = i32;
 pub type VipsStartFn = ::std::option::Option<
     unsafe extern "C" fn(
-        out: *mut _VipsImage,
+        out: *mut VipsImage,
         a: *mut ::std::os::raw::c_void,
         b: *mut ::std::os::raw::c_void,
     ) -> *mut ::std::os::raw::c_void,
 >;
 pub type VipsGenerateFn = ::std::option::Option<
     unsafe extern "C" fn(
-        out: *mut _VipsRegion,
+        out: *mut VipsRegion,
         seq: *mut ::std::os::raw::c_void,
         a: *mut ::std::os::raw::c_void,
         b: *mut ::std::os::raw::c_void,
@@ -1041,7 +1042,7 @@ pub type VipsStopFn = ::std::option::Option<
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct _VipsProgress {
-    pub im: *mut _VipsImage,
+    pub im: *mut VipsImage,
     pub run: ::std::os::raw::c_int,
     pub eta: ::std::os::raw::c_int,
     pub tpels: gint64,
@@ -1180,7 +1181,7 @@ pub struct _VipsImage {
     pub downstream: *mut GSList,
     pub serial: ::std::os::raw::c_int,
     pub history_list: *mut GSList,
-    pub progress_signal: *mut _VipsImage,
+    pub progress_signal: *mut VipsImage,
     pub file_length: gint64,
     pub hint_set: gboolean,
     pub delete_on_close: gboolean,
@@ -1851,6 +1852,13 @@ extern "C" {
 }
 extern "C" {
     pub fn vips_image_get_height(image: *const VipsImage) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn vips_image_get_as_string(
+        image: *const VipsImage,
+        name: *const ::std::os::raw::c_char,
+        out: *mut *mut ::std::os::raw::c_char,
+    ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn vips_concurrency_set(concurrency: ::std::os::raw::c_int);
