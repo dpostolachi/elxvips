@@ -5,7 +5,7 @@ extern crate num_cpus;
 use rustler::{Encoder, Env, Error, Term, Atom};
 use std::env;
 mod libvips;
-use libvips::{VipsImage};
+use libvips::{VipsImage, VipsFormat};
 use libvips::save_options::{JpegSaveOptions, PngSaveOptions, SmartcropOptions, Interesting};
 
 mod atoms {
@@ -74,11 +74,22 @@ static SMART_CROP_OPTS: SmartcropOptions = SmartcropOptions {
     interesting: Interesting::Centre,
 };
 
+
 fn image_into_bytes<'a>(image: VipsImage, save_options: SaveOptions) -> Result<Vec<u8>, String> {
+
     match save_options.format.decode::<Atom>() {
-        Ok( format ) => {
-            match format {
-                format if format == atoms::jpg() => {
+        Ok( atom_format ) => {
+            let vips_format = match atom_format {
+                format if format == atoms::jpg() => VipsFormat::JPEG,
+                format if format == atoms::png() => VipsFormat::PNG,
+                format if format == atoms::auto() => image.get_format().unwrap(),
+                _ => {
+                    return Err( "format not supported".to_string() )
+                }
+            };
+
+            match vips_format {
+                VipsFormat::JPEG => {
                     let options = JpegSaveOptions {
                         q: save_options.quality as i32,
                         strip: save_options.strip,
@@ -94,7 +105,7 @@ fn image_into_bytes<'a>(image: VipsImage, save_options: SaveOptions) -> Result<V
                     }
 
                 },
-                format if format == atoms::png() => {
+                VipsFormat::PNG => {
                     let options = PngSaveOptions {
                         q: save_options.quality as i32,
                         strip: save_options.strip,
@@ -111,7 +122,6 @@ fn image_into_bytes<'a>(image: VipsImage, save_options: SaveOptions) -> Result<V
                     }
 
                 },
-                _ => Err( "format not supported".to_string() )
             }
         },
         Err( _ ) => Err( "format not supported".to_string() )
@@ -231,10 +241,20 @@ fn resize_image<'a>(image: VipsImage, resize: &ResizeOptions<'a>) -> Result<Vips
 }
 
 fn save_image<'a>( image: &VipsImage, save_options: &SaveOptions<'a> ) -> Result<(), String> {
+
     match save_options.format.decode::<Atom>() {
-        Ok( format ) => {
-            match format {
-                format if format == atoms::jpg() => {
+        Ok( atom_format ) => {
+            let vips_format = match atom_format {
+                format if format == atoms::jpg() => VipsFormat::JPEG,
+                format if format == atoms::png() => VipsFormat::PNG,
+                format if format == atoms::auto() => image.get_format().unwrap(),
+                _ => {
+                    return Err( "format not supported".to_string() )
+                }
+            };
+
+            match vips_format {
+                VipsFormat::JPEG => {
                     let options = JpegSaveOptions {
                         q: save_options.quality as i32,
                         strip: save_options.strip,
@@ -250,7 +270,7 @@ fn save_image<'a>( image: &VipsImage, save_options: &SaveOptions<'a> ) -> Result
                     }
 
                 },
-                format if format == atoms::png() => {
+                VipsFormat::PNG => {
                     let options = PngSaveOptions {
                         q: save_options.quality as i32,
                         compression: save_options.compression as i32,
@@ -265,7 +285,6 @@ fn save_image<'a>( image: &VipsImage, save_options: &SaveOptions<'a> ) -> Result
                     }
 
                 },
-                _ => Err( "format not supported".to_string() )
             }
         },
         Err( _ ) => Err( "format not supported".to_string() )

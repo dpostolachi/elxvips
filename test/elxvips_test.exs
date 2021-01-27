@@ -93,14 +93,38 @@ defmodule ElxvipsTest do
     sizes = result
     |> get_image_sizes()
 
-    assert sizes == { :ok, [ 100, 100 ] } 
-    
+    assert sizes == { :ok, [ 100, 100 ] }
+
     image_file_sizes = result
     |> png()
     |> to_file( "test/from_bytes.png" )
     |> get_image_sizes()
 
     assert sizes == image_file_sizes
+  end
+
+  test "from file bytes, autodetect format" do
+
+    file = File.open!( "test/input.png", [ :read ] )
+    bytes = IO.binread( file, :all )
+
+    sizes = from_bytes( bytes )
+    |> resize( width: 100, height: 100 )
+    |> to_bytes()
+    |> get_image_sizes()
+
+    assert sizes == { :ok, [ 100, 100 ] }
+
+  end
+  test "from file, autodetect format" do
+
+    sizes = from_file( "test/input.png" )
+    |> resize( width: 100, height: 100 )
+    |> to_bytes()
+    |> get_image_sizes()
+
+    assert sizes == { :ok, [ 100, 100 ] }
+
   end
 
 end

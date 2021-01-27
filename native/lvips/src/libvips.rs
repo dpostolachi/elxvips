@@ -8,6 +8,11 @@ use utils::{c_string, null};
 use std::ffi::{CString};
 use save_options::{JpegSaveOptions, PngSaveOptions, SmartcropOptions};
 
+pub enum VipsFormat {
+    PNG,
+    JPEG,
+}
+
 pub fn error_buffer() -> String {
     unsafe {
         let error = CStr::from_ptr( bindings::vips_error_buffer() )
@@ -45,6 +50,32 @@ impl VipsImage {
             bindings::vips_image_get_height( self.image )
         }
     }
+    pub fn get_string( &self, vips_string: &CStr ) -> Result<String, String> {
+        unsafe {
+            let params = globals::get_params().unwrap();
+            let mut out = null();
+
+            match bindings::vips_image_get_as_string( self.image, vips_string.as_ptr(), &mut out ) {
+                0 => {
+                    // Note: string from bindings must be owned and received copy must
+                    // be freed
+                    let string = CStr::from_ptr( out ).to_str().unwrap().to_string();
+                    bindings::g_free( out as *mut c_void );
+                    Ok( string )
+                },
+                _ => Err( error_buffer() )
+            }
+        }
+    }
+    pub fn get_format( &self ) -> Result<VipsFormat, String> {
+        let params = globals::get_params().unwrap();
+        let format_string: &str = &self.get_string( &params.vips_loader ).unwrap();
+        match format_string {
+            "jpegload"  | "jpegload_buffer" => Ok( VipsFormat::JPEG ),
+            "pngload"   | "pngload_buffer" => Ok( VipsFormat::PNG ),
+            _ => Err( "unknown format".to_string() )
+        }
+    }
     pub fn from_file( path: &str ) -> Result<VipsImage, String> {
         let filename = c_string( path ).unwrap();
         unsafe {
@@ -60,6 +91,7 @@ impl VipsImage {
             }
         }
     }
+
     pub fn from_buffer( buffer: &[u8] ) -> Result<VipsImage, String> {
         let options = c_string("").unwrap();
         unsafe {
