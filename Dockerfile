@@ -4,7 +4,7 @@ from ubuntu:latest
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt update && \
-    apt install -y wget curl build-essential llvm clang libclang-dev libvips libvips-dev && \
+    apt install -y wget curl build-essential llvm clang libclang-dev libvips libvips-dev libwebp && \
     curl https://sh.rustup.rs -sSf | sh -s -- -y && \
     wget https://packages.erlang-solutions.com/erlang-solutions_2.0_all.deb && \
     dpkg -i erlang-solutions_2.0_all.deb && \
