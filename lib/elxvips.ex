@@ -57,6 +57,8 @@ defmodule Elxvips do
   defp vips_process_file_to_bytes(_a), do: :erlang.nif_error(:nif_not_loaded) # applies processing from %ImageBytes{} created from image path
   defp vips_process_bytes_to_bytes(_a), do: :erlang.nif_error(:nif_not_loaded) # applies processing from %ImageBytes{} created from image bytes
   defp vips_process_bytes_to_file(_a), do: :erlang.nif_error(:nif_not_loaded) # applies processing from %ImageBytes{} created from image bytes
+  defp vips_get_image_file_format(_a), do: :erlang.nif_error(:nif_not_loaded) # applies processing from %ImageBytes{} created from image bytes
+  defp vips_get_image_bytes_format(_a), do: :erlang.nif_error(:nif_not_loaded) # applies processing from %ImageBytes{} created from image bytes
 
   # creating new image from an existing image path
   defp process_to_file( image_file = %ImageFile{}, path ) when is_binary( path ) do
@@ -110,13 +112,13 @@ defmodule Elxvips do
   Empty resize( no :width and no :height) will produce an image with the dimensions as the original one.
 
   ## Examples
-      iex> Elxvips.from_file( "test/input.png" )
-      iex> |> Elxvips.resize( width: 300 )
+      iex> import Elxvips
+      iex>
+      iex> from_file( "test/input.png" )
+      iex> |> resize( width: 300 )
+      iex  |> to_bytes()
       {:ok, %ImageBytes{}}
 
-      iex> Elxvips.from_file( "test/input.png" )
-      iex> |> Elxvips.resize()
-      {:ok, %ImageBytes{}}
   """
   def resize( image_file, opts \\ [] )
   def resize( image_file = %ImageFile{}, opts ) do
@@ -152,11 +154,12 @@ defmodule Elxvips do
   By default quality is set to 90 and strip to true.
 
   ## Examples
-
-      iex> Elxvips.open( "/path/input.png" )
-      iex> |> Elxvips.jpg( "/path/output.jpg", strip: true, quality: 72 )
-      { :ok, %ImageFile{ :path => "/path/output.jpg", ... } }
-
+      iex> import Elxvips
+      iex>
+      iex> from_file( "/path/input.png" )
+      iex> |> jpg( strip: true, quality: 72 )
+      iex  |> to_file( "/path/output.jpg" )
+      { :ok, %ImageFile{} }
   """
   def jpg( image, opts \\ [] )
   def jpg( image_file = %ImageFile{}, opts ), do: format( image_file, :jpg, Keyword.merge( @jpg_default_opts, opts ) )
@@ -169,22 +172,43 @@ defmodule Elxvips do
   By default quality is set to 100, compression to 6, strip to true. Decreasing compression will speed up image saving.
 
   ## Examples
-
-      iex> Elxvips.open( "/path/input.jpg" )
-      iex> |> Elxvips.png( "/path/output.png", strip: true, quality: 72 )
-      { :ok, %ImageFile{ :path => "/path/output.png", ... } }
+      iex> import Elxvips
+      iex>
+      iex> from_file( "/path/input.jpg" )
+      iex> |> png( strip: true, quality: 72 )
+      iex  |> to_file( "/path/output.png" )
+      { :ok, %ImageFile{} }
   """
   def png( image, opts \\ [] )
   def png( image_file = %ImageFile{}, opts ), do: format( image_file, :png, Keyword.merge( @png_default_opts, opts ) )
   def png( image_file = %ImageBytes{}, opts ), do: format( image_file, :png, Keyword.merge( @png_default_opts, opts ) )
   def png( { :ok, image }, opts ), do: png( image, opts )
 
+  @webp_default_opts Keyword.merge( @save_opts_default, [ quality: 100 ] )
+  @doc """
+  Will save the ImageFile in webp format to a specified path. Accepts quality and strip options.
+  By default quality is set to 100, and strip to true.
+
+  ## Examples
+      iex> import Elxvips
+      iex>
+      iex> from_file( "/path/input.jpg" )
+      iex> |> webp( strip: true, quality: 72 )
+      iex  |> to_file( "/path/output.webp" )
+      { :ok, %ImageFile{} }
+  """
+  def webp( image, opts \\ [] )
+  def webp( image_file = %ImageFile{}, opts ), do: format( image_file, :webp, Keyword.merge( @webp_default_opts, opts ) )
+  def webp( image_file = %ImageBytes{}, opts ), do: format( image_file, :webp, Keyword.merge( @webp_default_opts, opts ) )
+  def webp( { :ok, image }, opts ), do: webp( image, opts )
+
   @doc """
   Will create an %ImageFile{} struct from path. This struct will be used for further processing.
 
   ## Examples
-
-      iex> Elxvips.from_file( "/path/input.png" )
+      iex> import Elxvips
+      iex>
+      iex> from_file( "/path/input.png" )
       %ImageFile{}
 
   """
@@ -198,10 +222,11 @@ defmodule Elxvips do
   Will create an %ImageByte{} struct from bitstring or byte list. This struct will be used for further processing.
 
   ## Examples
-
+      iex> import Elxvips
+      iex>
       iex> file = File.open!( "/path/input.png" )
       iex> bytes = IO.binread( file, :all )
-      iex> Elxvips.from_bytes( bytes )
+      iex> from_bytes( bytes )
       %ImageBytes{}
 
   """
@@ -220,9 +245,11 @@ defmodule Elxvips do
   Will create a new %ImageBytes{} struct containing all the changes.
 
   ## Examples
-      iex> Elxvips.from_file( "test/input.png" )
-      iex> |> Elxvips.png()
-      iex> |> Elxvips.to_bytes()
+      iex> import Elxvips
+      iex>
+      iex> from_file( "test/input.png" )
+      iex> |> png()
+      iex> |> to_bytes()
       {:ok, %ImageBytes{}}
   """
   def to_bytes( image = %ImageFile{} ), do: process_to_bytes( image )
@@ -233,9 +260,11 @@ defmodule Elxvips do
   Will save the image to a path on disk and return a new %ImageFile{} from the new path.
 
   ## Examples
-      iex> Elxvips.from_file( "test/input.png" )
-      iex> |> Elxvips.png()
-      iex> |> Elxvips.to_file( "test/outping.png" )
+      iex> import Elxvips
+      iex>
+      iex> from_file( "test/input.png" )
+      iex> |> png()
+      iex> |> to_file( "test/outping.png" )
       {:ok, %ImageBytes{}}
   """
   def to_file( image = %ImageFile{}, path ) when is_binary( path ), do: process_to_file( image, path )
@@ -250,8 +279,10 @@ defmodule Elxvips do
   Returns dimensions of the specified image, works with a image path or bytes.
 
   ## Examples
-      iex> Elxvips.from_file( "test/input.png" )
-      iex> |> Elxvips.get_image_sizes()
+      iex> import Elxvips
+      iex>
+      iex> from_file( "test/input.png" )
+      iex> |> get_image_sizes()
       {:ok, [640, 486]}
   """
   def get_image_sizes( path ) when is_binary( path ), do: vips_get_image_sizes( path )
@@ -262,5 +293,24 @@ defmodule Elxvips do
 
   def get_image_sizes( %ImageBytes{ :bytes => bytes } ) when is_list( bytes ), do: get_image_sizes( bytes )
   def get_image_sizes( { :ok, image_bytes = %ImageBytes{} } ), do: get_image_sizes( image_bytes )
+
+  @doc """
+  Returns format of the specified image, works with a image path or bytes.
+
+  ## Examples
+      iex> import Elxvips
+      iex>
+      iex> from_file( "test/input.png" )
+      iex> |> get_image_format()
+      {:ok, :png}
+  """
+  def get_image_format( path ) when is_binary( path ), do: vips_get_image_file_format( path )
+  def get_image_format( bytes ) when is_list( bytes ), do: vips_get_image_bytes_format( bytes )
+
+  def get_image_format( %ImageFile{ :path => path } ), do: get_image_format( path )
+  def get_image_format( {:ok, %ImageFile{ :path => path } } ), do: get_image_format( path )
+
+  def get_image_format( %ImageBytes{ :bytes => bytes } ) when is_list( bytes ), do: get_image_format( bytes )
+  def get_image_format( { :ok, image_bytes = %ImageBytes{} } ), do: get_image_format( image_bytes )
 
 end
