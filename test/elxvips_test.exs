@@ -118,27 +118,24 @@ defmodule ElxvipsTest do
   end
   test "from file, autodetect format" do
 
-    sizes = from_file( "test/input.png" )
+    format = from_file( "test/input.png" )
     |> resize( width: 100, height: 100 )
     |> to_bytes()
-    |> get_image_sizes()
+    |> get_image_format()
 
-    assert sizes == { :ok, [ 100, 100 ] }
+    assert format == { :ok, :png }
 
   end
 
   test "from png to webp" do
 
-    sizes = from_file( "test/input.png" )
+    format = from_file( "test/input.png" )
     |> resize( width: 100, height: 100 )
     |> webp()
-    |> to_file( "test/output.webp" )
-    |> get_image_sizes()
-
-    assert sizes == { :ok, [ 100, 100 ] }
-
-    assert { :ok, :webp } = from_file( "test/output.webp" )
+    |> to_bytes()
     |> get_image_format()
+
+    assert format == { :ok, :webp }
 
   end
 
