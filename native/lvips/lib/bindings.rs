@@ -2,7 +2,7 @@
 
 pub type size_t = ::std::os::raw::c_ulong;
 pub type guint32 = ::std::os::raw::c_uint;
-pub type gint64 = ::std::os::raw::c_long;
+pub type gint64 = ::std::os::raw::c_longlong;
 pub type gsize = ::std::os::raw::c_ulong;
 pub type gint = ::std::os::raw::c_int;
 pub type gboolean = gint;
@@ -1875,6 +1875,21 @@ extern "C" {
 }
 extern "C" {
     pub fn vips_jpegsave_buffer(
+        in_: *mut VipsImage,
+        buf: *mut *mut ::std::os::raw::c_void,
+        len: *mut size_t,
+        ...
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn vips_webpsave(
+        in_: *mut VipsImage,
+        filename: *const ::std::os::raw::c_char,
+        ...
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn vips_webpsave_buffer(
         in_: *mut VipsImage,
         buf: *mut *mut ::std::os::raw::c_void,
         len: *mut size_t,

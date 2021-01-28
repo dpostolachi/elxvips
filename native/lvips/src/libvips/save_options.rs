@@ -118,6 +118,78 @@ impl std::default::Default for PngSaveOptions {
     }
 }
 
+/// Options for webpsave operation
+#[derive(Clone, Debug)]
+pub struct WebPSaveOptions {
+    /// q: `i32` -> Q factor
+    /// min: 0, max: 100, default: 75
+    pub q: i32,
+    /// lossless: `bool` -> enable lossless compression
+    /// default: false
+    pub lossless: bool,
+    /// preset: `ForeignWebpPreset` -> Preset for lossy compression
+    ///  `Default` -> VIPS_FOREIGN_WEBP_PRESET_DEFAULT = 0 [DEFAULT]
+    ///  `Picture` -> VIPS_FOREIGN_WEBP_PRESET_PICTURE = 1
+    ///  `Photo` -> VIPS_FOREIGN_WEBP_PRESET_PHOTO = 2
+    ///  `Drawing` -> VIPS_FOREIGN_WEBP_PRESET_DRAWING = 3
+    ///  `Icon` -> VIPS_FOREIGN_WEBP_PRESET_ICON = 4
+    ///  `Text` -> VIPS_FOREIGN_WEBP_PRESET_TEXT = 5
+    ///  `Last` -> VIPS_FOREIGN_WEBP_PRESET_LAST = 6
+    pub preset: ForeignWebpPreset,
+    /// smart_subsample: `bool` -> Enable high quality chroma subsampling
+    /// default: false
+    pub smart_subsample: bool,
+    /// near_lossless: `bool` -> Enable preprocessing in lossless mode (uses Q)
+    /// default: false
+    pub near_lossless: bool,
+    /// alpha_q: `i32` -> Change alpha plane fidelity for lossy compression
+    /// min: 0, max: 100, default: 100
+    pub alpha_q: i32,
+    /// min_size: `bool` -> Optimise for minium size
+    /// default: false
+    pub min_size: bool,
+    /// kmin: `i32` -> Minimum number of frames between key frames
+    /// min: 0, max: 2147483647, default: 2147483646
+    pub kmin: i32,
+    /// kmax: `i32` -> Maximum number of frames between key frames
+    /// min: 0, max: 2147483647, default: 2147483647
+    pub kmax: i32,
+    /// reduction_effort: `i32` -> Level of CPU effort to reduce file size
+    /// min: 0, max: 6, default: 4
+    pub reduction_effort: i32,
+    /// profile: `String` -> ICC profile to embed
+    pub profile: String,
+    /// strip: `bool` -> Strip all metadata from image
+    /// default: false
+    pub strip: bool,
+    /// background: `Vec<f64>` -> Background value
+    pub background: Vec<f64>,
+    /// page_height: `i32` -> Set page height for multipage save
+    /// min: 0, max: 10000000, default: 0
+    pub page_height: i32,
+}
+
+impl std::default::Default for WebPSaveOptions {
+    fn default() -> Self {
+        WebPSaveOptions {
+            q: i32::from(75),
+            lossless: false,
+            preset: ForeignWebpPreset::Default,
+            smart_subsample: false,
+            near_lossless: false,
+            alpha_q: i32::from(100),
+            min_size: false,
+            kmin: i32::from(2147483646),
+            kmax: i32::from(2147483647),
+            reduction_effort: i32::from(4),
+            profile: String::from("sRGB"),
+            strip: false,
+            background: Vec::new(),
+            page_height: i32::from(0),
+        }
+    }
+}
+
 #[derive(Copy, Clone, Debug)]
 pub enum ForeignPngFilter {
     ///  `None` -> VIPS_FOREIGN_PNG_FILTER_NONE = 8
@@ -132,6 +204,24 @@ pub enum ForeignPngFilter {
     Paeth = 128,
     ///  `All` -> VIPS_FOREIGN_PNG_FILTER_ALL = 248
     All = 248,
+}
+
+#[derive(Copy, Clone, Debug)]
+pub enum ForeignWebpPreset {
+    ///  `Default` -> VIPS_FOREIGN_WEBP_PRESET_DEFAULT = 0
+    Default = 0,
+    ///  `Picture` -> VIPS_FOREIGN_WEBP_PRESET_PICTURE = 1
+    Picture = 1,
+    ///  `Photo` -> VIPS_FOREIGN_WEBP_PRESET_PHOTO = 2
+    Photo = 2,
+    ///  `Drawing` -> VIPS_FOREIGN_WEBP_PRESET_DRAWING = 3
+    Drawing = 3,
+    ///  `Icon` -> VIPS_FOREIGN_WEBP_PRESET_ICON = 4
+    Icon = 4,
+    ///  `Text` -> VIPS_FOREIGN_WEBP_PRESET_TEXT = 5
+    Text = 5,
+    ///  `Last` -> VIPS_FOREIGN_WEBP_PRESET_LAST = 6
+    Last = 6,
 }
 
 #[derive(Copy, Clone, Debug)]

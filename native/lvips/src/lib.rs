@@ -6,7 +6,7 @@ use rustler::{Encoder, Env, Error, Term, Atom};
 use std::env;
 mod libvips;
 use libvips::{VipsImage, VipsFormat};
-use libvips::save_options::{JpegSaveOptions, PngSaveOptions, SmartcropOptions, Interesting};
+use libvips::save_options::{JpegSaveOptions, PngSaveOptions, WebPSaveOptions, SmartcropOptions, Interesting};
 
 mod atoms {
     rustler::rustler_atoms! {
@@ -16,6 +16,7 @@ mod atoms {
         atom none;
         atom png;
         atom jpg;
+        atom webp;
         //atom __true__ = "true";
         //atom __false__ = "false";
     }
@@ -61,10 +62,16 @@ rustler::rustler_export_nifs! {
     [
         ("vips_process_file_to_file", 1, process_file_to_file),
         ("vips_process_file_to_bytes", 1, process_file_to_bytes),
+        
         ("vips_process_bytes_to_bytes", 1, process_bytes_to_bytes),
         ("vips_process_bytes_to_file", 1, process_bytes_to_file),
+
         ("vips_get_image_sizes", 1, get_image_sizes),
         ("vips_get_image_bytes_sizes", 1, get_image_bytes_sizes),
+
+        ("vips_get_image_file_format", 1, get_image_file_format),
+        ("vips_get_image_bytes_format", 1, get_image_bytes_format),
+        
         ("vips_set_concurrency", 1, set_concurrency),
     ],
     Some(on_load)
@@ -74,6 +81,13 @@ static SMART_CROP_OPTS: SmartcropOptions = SmartcropOptions {
     interesting: Interesting::Centre,
 };
 
+fn format_to_atom( format: VipsFormat ) -> Atom {
+    match format {
+        VipsFormat::JPEG => atoms::jpg(),
+        VipsFormat::PNG => atoms::png(),
+        VipsFormat::WEBP => atoms::webp(),
+    }
+}
 
 fn image_into_bytes<'a>(image: VipsImage, save_options: SaveOptions) -> Result<Vec<u8>, String> {
 
@@ -82,6 +96,7 @@ fn image_into_bytes<'a>(image: VipsImage, save_options: SaveOptions) -> Result<V
             let vips_format = match atom_format {
                 format if format == atoms::jpg() => VipsFormat::JPEG,
                 format if format == atoms::png() => VipsFormat::PNG,
+                format if format == atoms::webp() => VipsFormat::WEBP,
                 format if format == atoms::auto() => image.get_format().unwrap(),
                 _ => {
                     return Err( "format not supported".to_string() )
@@ -122,6 +137,21 @@ fn image_into_bytes<'a>(image: VipsImage, save_options: SaveOptions) -> Result<V
                     }
 
                 },
+                VipsFormat::WEBP => {
+                    let options = WebPSaveOptions {
+                        q: save_options.quality as i32,
+                        strip: save_options.strip,
+                        ..WebPSaveOptions::default()
+                    };
+
+                    match image.webp_buffer_opts(&options) {
+                        Ok ( bytes ) => {
+                            Ok( bytes )
+                        }
+                        Err( err )  => Err( format!( "failed to save image: {}", err ) )
+                    }
+
+                },
             }
         },
         Err( _ ) => Err( "format not supported".to_string() )
@@ -147,6 +177,43 @@ fn get_image_bytes_sizes<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>
     };
     match result {
         Ok( bytes ) => Ok( ( atoms::ok(), bytes.encode( env ) ).encode( env ) ),
+        Err( error_str ) => Ok( ( atoms::error(), error_str ).encode( env ) )
+    }
+}
+
+fn get_image_file_format<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
+    let result = match args[0].decode::<&str>() {
+        Ok( path ) => {
+            match VipsImage::from_file( &path ) {
+                Ok( image ) => {
+                    Ok( image.get_format().unwrap() )
+                },
+                Err( err ) => Err( format!( "failed to open image: {}", err ) )
+            }
+        },
+        Err( _ ) => Err( "failed to parse input data".to_string() )
+    };
+
+    match result {
+        Ok( format ) => Ok( ( atoms::ok(), format_to_atom( format ) ).encode( env ) ),
+        Err( err ) => Ok( ( atoms::error(), err ).encode( env ) )
+    }
+}
+
+fn get_image_bytes_format<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
+    let result = match args[0].decode::<Vec<u8>>() {
+        Ok( bytes ) => {
+            match image_from_bytes( &bytes ) {
+                Ok( image ) => {
+                    Ok( image.get_format().unwrap() )
+                },
+                Err( err ) => Err( format!( "failed to read image from bytes: {}", err ) )
+            }
+        }
+        Err( _ ) => Err( "failed to parse input data".to_string() )
+    };
+    match result {
+        Ok( format ) => Ok( ( atoms::ok(), format_to_atom( format ) ).encode( env ) ),
         Err( error_str ) => Ok( ( atoms::error(), error_str ).encode( env ) )
     }
 }
@@ -247,6 +314,7 @@ fn save_image<'a>( image: &VipsImage, save_options: &SaveOptions<'a> ) -> Result
             let vips_format = match atom_format {
                 format if format == atoms::jpg() => VipsFormat::JPEG,
                 format if format == atoms::png() => VipsFormat::PNG,
+                format if format == atoms::webp() => VipsFormat::WEBP,
                 format if format == atoms::auto() => image.get_format().unwrap(),
                 _ => {
                     return Err( "format not supported".to_string() )
@@ -280,6 +348,19 @@ fn save_image<'a>( image: &VipsImage, save_options: &SaveOptions<'a> ) -> Result
                     };
 
                     match image.save_png_opts(&save_options.path, &options) {
+                        Ok ( () ) => Ok( () ),
+                        Err( err )  => Err( format!( "failed to save image: {}", err ) )
+                    }
+
+                },
+                VipsFormat::WEBP => {
+                    let options = WebPSaveOptions {
+                        q: save_options.quality as i32,
+                        strip: save_options.strip,
+                        ..WebPSaveOptions::default()
+                    };
+
+                    match image.save_webp_opts(&save_options.path, &options) {
                         Ok ( () ) => Ok( () ),
                         Err( err )  => Err( format!( "failed to save image: {}", err ) )
                     }
