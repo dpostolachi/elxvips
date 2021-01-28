@@ -1882,6 +1882,21 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
+    pub fn vips_webpsave(
+        in_: *mut VipsImage,
+        filename: *const ::std::os::raw::c_char,
+        ...
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn vips_webpsave_buffer(
+        in_: *mut VipsImage,
+        buf: *mut *mut ::std::os::raw::c_void,
+        len: *mut size_t,
+        ...
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
     pub fn vips_pngsave(
         in_: *mut VipsImage,
         filename: *const ::std::os::raw::c_char,

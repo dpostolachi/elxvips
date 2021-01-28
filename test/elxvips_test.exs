@@ -127,4 +127,15 @@ defmodule ElxvipsTest do
 
   end
 
+  test "from webp file, autodetect format" do
+
+    sizes = from_file( "test/input.webp" )
+    |> resize( width: 100, height: 100 )
+    |> to_file( "test/output.webp" )
+    |> get_image_sizes()
+
+    assert sizes == { :ok, [ 100, 100 ] }
+
+  end
+
 end

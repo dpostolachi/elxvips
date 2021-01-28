@@ -6,7 +6,7 @@ use rustler::{Encoder, Env, Error, Term, Atom};
 use std::env;
 mod libvips;
 use libvips::{VipsImage, VipsFormat};
-use libvips::save_options::{JpegSaveOptions, PngSaveOptions, SmartcropOptions, Interesting};
+use libvips::save_options::{JpegSaveOptions, PngSaveOptions, WebPSaveOptions, SmartcropOptions, Interesting};
 
 mod atoms {
     rustler::rustler_atoms! {
@@ -16,6 +16,7 @@ mod atoms {
         atom none;
         atom png;
         atom jpg;
+        atom webp;
         //atom __true__ = "true";
         //atom __false__ = "false";
     }
@@ -82,6 +83,7 @@ fn image_into_bytes<'a>(image: VipsImage, save_options: SaveOptions) -> Result<V
             let vips_format = match atom_format {
                 format if format == atoms::jpg() => VipsFormat::JPEG,
                 format if format == atoms::png() => VipsFormat::PNG,
+                format if format == atoms::webp() => VipsFormat::WEBP,
                 format if format == atoms::auto() => image.get_format().unwrap(),
                 _ => {
                     return Err( "format not supported".to_string() )
@@ -115,6 +117,21 @@ fn image_into_bytes<'a>(image: VipsImage, save_options: SaveOptions) -> Result<V
                     };
 
                     match image.png_buffer_opts(&options){
+                        Ok ( bytes ) => {
+                            Ok( bytes )
+                        }
+                        Err( err )  => Err( format!( "failed to save image: {}", err ) )
+                    }
+
+                },
+                VipsFormat::WEBP => {
+                    let options = WebPSaveOptions {
+                        q: save_options.quality as i32,
+                        strip: save_options.strip,
+                        ..WebPSaveOptions::default()
+                    };
+
+                    match image.webp_buffer_opts(&options) {
                         Ok ( bytes ) => {
                             Ok( bytes )
                         }
@@ -247,6 +264,7 @@ fn save_image<'a>( image: &VipsImage, save_options: &SaveOptions<'a> ) -> Result
             let vips_format = match atom_format {
                 format if format == atoms::jpg() => VipsFormat::JPEG,
                 format if format == atoms::png() => VipsFormat::PNG,
+                format if format == atoms::webp() => VipsFormat::WEBP,
                 format if format == atoms::auto() => image.get_format().unwrap(),
                 _ => {
                     return Err( "format not supported".to_string() )
@@ -280,6 +298,19 @@ fn save_image<'a>( image: &VipsImage, save_options: &SaveOptions<'a> ) -> Result
                     };
 
                     match image.save_png_opts(&save_options.path, &options) {
+                        Ok ( () ) => Ok( () ),
+                        Err( err )  => Err( format!( "failed to save image: {}", err ) )
+                    }
+
+                },
+                VipsFormat::WEBP => {
+                    let options = WebPSaveOptions {
+                        q: save_options.quality as i32,
+                        strip: save_options.strip,
+                        ..WebPSaveOptions::default()
+                    };
+
+                    match image.save_webp_opts(&save_options.path, &options) {
                         Ok ( () ) => Ok( () ),
                         Err( err )  => Err( format!( "failed to save image: {}", err ) )
                     }

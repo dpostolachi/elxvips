@@ -6,11 +6,12 @@ pub mod globals;
 use std::ffi::{CStr, c_void};
 use utils::{c_string, null};
 use std::ffi::{CString};
-use save_options::{JpegSaveOptions, PngSaveOptions, SmartcropOptions};
+use save_options::{JpegSaveOptions, PngSaveOptions, WebPSaveOptions, SmartcropOptions};
 
 pub enum VipsFormat {
     PNG,
     JPEG,
+    WEBP,
 }
 
 pub fn error_buffer() -> String {
@@ -73,6 +74,7 @@ impl VipsImage {
         match format_string {
             "jpegload"  | "jpegload_buffer" => Ok( VipsFormat::JPEG ),
             "pngload"   | "pngload_buffer" => Ok( VipsFormat::PNG ),
+            "webpload"   | "webpload_buffer" => Ok( VipsFormat::WEBP ),
             _ => Err( "unknown format".to_string() )
         }
     }
@@ -200,6 +202,43 @@ impl VipsImage {
             }
         }
     }
+
+    pub fn save_webp( &self, path: &str ) -> Result<(), String> {
+        let filename = c_string( path ).unwrap();
+        unsafe {
+            match bindings::vips_webpsave(
+                self.image as *mut bindings::_VipsImage,
+                filename.as_ptr(),
+                utils::NULL
+            ) {
+                0 => Ok( () ),
+                _ => Err( error_buffer() )
+            }
+        }
+    }
+    pub fn save_webp_opts( &self, path: &str, options: &save_options::WebPSaveOptions ) -> Result<(), String> {
+        let filename = c_string( path ).unwrap();
+        let profile = c_string(&options.profile).unwrap();
+        let params = globals::get_params().unwrap();
+
+        unsafe {
+            let background_array = bindings::vips_array_double_new(options.background.as_ptr(), options.background.len() as i32);
+
+            match bindings::vips_webpsave(
+                self.image as *mut bindings::_VipsImage,
+                filename.as_ptr(),
+                params.page_height.as_ptr(),        options.page_height,
+                params.q.as_ptr(),                  options.q,
+                params.strip.as_ptr(),              options.strip as i32,
+                params.background.as_ptr(),         background_array,
+                utils::NULL
+            ) {
+                0 => Ok( () ),
+                _ => Err( error_buffer() )
+            }
+        }
+    }
+
     pub fn save_jpeg( &self, path: &str ) -> Result<(), String> {
         let filename = c_string( path ).unwrap();
 
@@ -334,6 +373,48 @@ impl VipsImage {
                 params.colours.as_ptr(),            options.colours,
                 params.q.as_ptr(),                  options.q,
                 params.dither.as_ptr(),             options.dither,
+                params.strip.as_ptr(),              options.strip as i32,
+                params.background.as_ptr(),         background_array,
+                utils::NULL
+            ) {
+                0 => Ok( utils::get_buffer( buffer_out, buffer_buf_size ) ),
+                _ => Err( error_buffer() )
+            }
+        }
+    }
+
+    pub fn webp_buffer( &self ) -> Result<Vec<u8>, String> {
+        let mut buffer_buf_size: u64 = 0;
+        let mut buffer_out = null();
+
+        unsafe {
+            match bindings::vips_webpsave_buffer(
+                self.image as *mut bindings::_VipsImage,
+                &mut buffer_out,
+                &mut buffer_buf_size,
+                utils::NULL,
+            ) {
+                0 => Ok( utils::get_buffer( buffer_out, buffer_buf_size ) ),
+                _ => Err( error_buffer() )
+            }
+        }
+    }
+
+    pub fn webp_buffer_opts( &self, options: &WebPSaveOptions ) -> Result<Vec<u8>, String> {
+        let mut buffer_buf_size: u64 = 0;
+        let mut buffer_out = null();
+        let params = globals::get_params().unwrap();
+        let profile = c_string(&options.profile).unwrap();
+
+        unsafe {
+            let background_array = bindings::vips_array_double_new(options.background.as_ptr(), options.background.len() as i32);
+
+            match bindings::vips_webpsave_buffer(
+                self.image as *mut bindings::_VipsImage,
+                &mut buffer_out,
+                &mut buffer_buf_size,
+                params.page_height.as_ptr(),        options.page_height,
+                params.q.as_ptr(),                  options.q,
                 params.strip.as_ptr(),              options.strip as i32,
                 params.background.as_ptr(),         background_array,
                 utils::NULL
