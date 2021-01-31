@@ -2,7 +2,7 @@
 
 pub type size_t = ::std::os::raw::c_ulong;
 pub type guint32 = ::std::os::raw::c_uint;
-pub type gint64 = ::std::os::raw::c_longlong;
+pub type gint64 = ::std::os::raw::c_long;
 pub type gsize = ::std::os::raw::c_ulong;
 pub type gint = ::std::os::raw::c_int;
 pub type gboolean = gint;
