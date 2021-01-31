@@ -13,6 +13,7 @@ defmodule Elxvips.SaveOptions do
     strip: true,
     path: "",
     compression: 6,
+    background: [],
   ]
 end
 
@@ -106,6 +107,18 @@ defmodule Elxvips do
     end
   end
 
+  defp format( image_file = %ImageFile{}, format , opts ) do
+    { :ok, %ImageFile{ image_file |
+      :save => Kernel.struct( %SaveOptions{}, opts ++ [ format: format, path: "" ] ),
+    } }
+  end
+  defp format( image_file = %ImageBytes{}, format , opts ) do
+    { :ok, %ImageBytes{ image_file |
+      :save => Kernel.struct( %SaveOptions{}, opts ++ [ format: format, path: "" ] ),
+    } }
+  end
+  defp format( { :ok, image }, format, opts ), do: format( image, format, opts )
+
   @doc """
   Applies resize options to an %ImageFile{} or %ImageBytes{}, accepts :width, :height and :type (not implemented yet).
   If no width or height is specified dimensions are calculated from the input image.
@@ -134,21 +147,9 @@ defmodule Elxvips do
   end
   def resize( { :ok, image_bytes = %ImageBytes{} }, opts ), do: resize( image_bytes, opts )
 
-  defp format( image_file = %ImageFile{}, format , opts ) do
-    { :ok, %ImageFile{ image_file |
-      :save => Kernel.struct( %SaveOptions{}, opts ++ [ format: format, path: "" ] ),
-    } }
-  end
-  defp format( image_file = %ImageBytes{}, format , opts ) do
-    { :ok, %ImageBytes{ image_file |
-      :save => Kernel.struct( %SaveOptions{}, opts ++ [ format: format, path: "" ] ),
-    } }
-  end
-  defp format( { :ok, image }, format, opts ), do: format( image, format, opts )
+  @save_opts_default [ quality: 100, strip: true, compression: 6, background: [] ]
 
-  @save_opts_default [ quality: 100, strip: true, compression: 6 ]
-
-  @jpg_default_opts Keyword.merge( @save_opts_default, [ quality: 90 ] )
+  @jpg_default_opts Keyword.merge( @save_opts_default, [ quality: 90, background: [ 255.0 ] ] )
   @doc """
   Will save the ImageFile in jpeg format to a specified path. Accepts quality and strip options.
   By default quality is set to 90 and strip to true.

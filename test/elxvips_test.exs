@@ -139,4 +139,16 @@ defmodule ElxvipsTest do
 
   end
 
+  test "from png to jpg, transparent background" do
+
+    format = from_file( "test/input2.png" )
+    |> resize( width: 100, height: 100 )
+    |> jpg()
+    |> to_file( "test/output2.jpg" )
+    |> get_image_format()
+
+    assert format == { :ok, :jpg }
+
+  end
+
 end
