@@ -143,6 +143,7 @@ defmodule ElxvipsTest do
 
     format = from_file( "test/input2.png" )
     |> resize( width: 100, height: 100 )
+    |> background( [ 255, 0, 255 ] )
     |> jpg()
     |> to_file( "test/output2.jpg" )
     |> get_image_format()

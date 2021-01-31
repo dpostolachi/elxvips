@@ -107,17 +107,98 @@ defmodule Elxvips do
     end
   end
 
-  defp format( image_file = %ImageFile{}, format , opts ) do
-    { :ok, %ImageFile{ image_file |
-      :save => Kernel.struct( %SaveOptions{}, opts ++ [ format: format, path: "" ] ),
-    } }
+
+  defp format_merge( :background, a_val, b_val ) do
+    case b_val do
+      [] -> a_val
+      _ -> b_val
+    end
   end
-  defp format( image_file = %ImageBytes{}, format , opts ) do
-    { :ok, %ImageBytes{ image_file |
-      :save => Kernel.struct( %SaveOptions{}, opts ++ [ format: format, path: "" ] ),
-    } }
+
+  defp format_merge( _, _, b_val ) do
+    b_val
+  end
+
+  defp format( image_file = %ImageFile{}, format , opts ) do
+    with opts when is_list( opts ) <- check_opts( opts ) do
+      { :ok, %ImageFile{ image_file |
+        :save => Map.merge( image_file.save, Map.new( opts ++ [ format: format, path: "" ] ), &format_merge/3 ),
+      } }
+    end
+  end
+
+  defp format( image_bytes = %ImageBytes{}, format , opts ) do
+    with opts when is_list( opts ) <- check_opts( opts ) do
+      { :ok, %ImageBytes{ image_bytes |
+        :save => Map.merge( image_bytes.save, Map.new( opts ++ [ format: format, path: "" ] ), &format_merge/3 ),
+      } }
+    end
+
   end
   defp format( { :ok, image }, format, opts ), do: format( image, format, opts )
+
+  def check_opts( opts \\ [] ) do
+    with opts when is_list( opts ) <- check_background( opts )  do
+      opts
+    end
+  end
+
+  defp check_background( opts ) do
+    with background_list when is_list( background_list ) <- background_opts( Keyword.get( opts, :background, [] ) ) do
+      Keyword.put( opts, :background, background_list )
+    end
+  end
+
+  # vips expects a vector of f64, this should convert integers to float
+  defp background_opts( [ c1 ] ), do: [ c1 / 1 ]
+  defp background_opts( [ c1, c2, c3 ] ), do: [ c1 / 1, c2 / 1, c3 / 1 ]
+  defp background_opts( [] ), do: []
+  defp background_opts( _ ), do: { :error, "background can be a vector of 1 or 3 numbers" }
+
+
+  @doc """
+  Sets the background of the image in case there is a transparent background.
+  Accepts a empty list, or a list of length 2 or 3.
+
+  ## Examples
+      iex> import Elxvips
+      iex>
+      iex> from_file( "test/input.png" )
+      iex  |> jpg()
+      iex> |> background( [ 255, 0, 0 ] ) # red background
+      iex  |> to_file( "test/output.jpg" )
+      {:ok, %ImageBytes{}}
+
+  """
+  # def background( image = %ImageFile{}, c1 ), do: background( image, c1 )
+  # def background( image = %ImageFile{}, c1, c2, c3 ), do: background( image, c1 )
+  # def background( image = %ImageFile{}, c1 ), do: background( image, c1 )
+  # def background( image = %ImageFile{}, c1, c2, c3 ), do: background( image, c1 )
+
+  def background( image, opts \\ [] )
+
+  def background( image_file = %ImageFile{}, colors ) do
+    with background_list when is_list( background_list ) <- background_opts( colors ) do
+      { :ok, %ImageFile{ image_file |
+        :save => %SaveOptions { image_file.save |
+          :background => background_list,
+        },
+      } }
+    end
+  end
+
+  def background( image_bytes = %ImageBytes{}, colors ) do
+    with background_list when is_list( background_list ) <- background_opts( colors ) do
+      { :ok, %ImageBytes{ image_bytes |
+        :save => %SaveOptions { image_bytes.save |
+          :background => background_list,
+        },
+      } }
+    end
+  end
+
+  def background( { :ok, image_file = %ImageFile{} }, colors ), do: background( image_file, colors )
+  def background( { :ok, image_bytes = %ImageBytes{} }, colors ), do: background( image_bytes, colors )
 
   @doc """
   Applies resize options to an %ImageFile{} or %ImageBytes{}, accepts :width, :height and :type (not implemented yet).
@@ -149,7 +230,7 @@ defmodule Elxvips do
 
   @save_opts_default [ quality: 100, strip: true, compression: 6, background: [] ]
 
-  @jpg_default_opts Keyword.merge( @save_opts_default, [ quality: 90, background: [ 255.0 ] ] )
+  @jpg_default_opts Keyword.merge( @save_opts_default, [ quality: 90 ] )
   @doc """
   Will save the ImageFile in jpeg format to a specified path. Accepts quality and strip options.
   By default quality is set to 90 and strip to true.
