@@ -39,6 +39,7 @@ struct SaveOptions<'a> {
     path: &'a str,
     format: Term<'a>,
     compression: u8,
+    background: Vec<f64>,
 }
 
 #[module = "Elxvips.ImageFile"]
@@ -111,6 +112,7 @@ fn image_into_bytes<'a>(image: VipsImage, save_options: SaveOptions) -> Result<V
                         optimize_coding: true,
                         optimize_scans: true,
                         interlace: true,
+                        background: save_options.background.to_owned(),
                         ..JpegSaveOptions::default()
                     };
 
@@ -126,6 +128,7 @@ fn image_into_bytes<'a>(image: VipsImage, save_options: SaveOptions) -> Result<V
                         strip: save_options.strip,
                         compression: save_options.compression as i32,
                         interlace: true,
+                        background: save_options.background.to_owned(),
                         ..PngSaveOptions::default()
                     };
 
@@ -141,6 +144,7 @@ fn image_into_bytes<'a>(image: VipsImage, save_options: SaveOptions) -> Result<V
                     let options = WebPSaveOptions {
                         q: save_options.quality as i32,
                         strip: save_options.strip,
+                        background: save_options.background.to_owned(),
                         ..WebPSaveOptions::default()
                     };
 
@@ -329,6 +333,7 @@ fn save_image<'a>( image: &VipsImage, save_options: &SaveOptions<'a> ) -> Result
                         optimize_coding: true,
                         optimize_scans: true,
                         interlace: true,
+                        background: save_options.background.to_owned(),
                         ..JpegSaveOptions::default()
                     };
 
@@ -344,6 +349,7 @@ fn save_image<'a>( image: &VipsImage, save_options: &SaveOptions<'a> ) -> Result
                         compression: save_options.compression as i32,
                         strip: save_options.strip,
                         interlace: true,
+                        background: save_options.background.to_owned(),
                         ..PngSaveOptions::default()
                     };
 
@@ -357,6 +363,7 @@ fn save_image<'a>( image: &VipsImage, save_options: &SaveOptions<'a> ) -> Result
                     let options = WebPSaveOptions {
                         q: save_options.quality as i32,
                         strip: save_options.strip,
+                        background: save_options.background.to_owned(),
                         ..WebPSaveOptions::default()
                     };
 
