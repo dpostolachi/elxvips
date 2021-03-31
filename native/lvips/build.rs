@@ -1,8 +1,63 @@
 extern crate bindgen;
+extern crate num_cpus;
 use std::process::Command;
 use std::path::PathBuf;
+use std::fs::File;
+use std::io::prelude::*;
+use flate2::read::GzDecoder;
+use tar::Archive;
+
+// use reqwest;
 
 fn main() {
+
+    // let tar_gz = reqwest::blocking::get("https://github.com/libvips/libvips/releases/download/v8.10.6/vips-8.10.6.tar.gz").unwrap()
+    //     .bytes().unwrap();
+
+    // let tar = GzDecoder::new(&*tar_gz);
+    // let mut archive = Archive::new(tar);
+    // archive.unpack("./lib").unwrap();
+
+    let cpus = num_cpus::get() as u8;
+
+    let pwd_out = &Command::new( "sh" )
+        .arg( "-c" )
+        .arg( "pwd" )
+        .output()
+        .unwrap()
+        .stdout;
+    let dirty_out_path = String::from_utf8_lossy( &pwd_out );
+    let out_path = String::from( &dirty_out_path[..( dirty_out_path.len() - 1 )] );
+
+    let conf_string = String::from( "./lib/vips-8.10.6/configure --prefix=" );
+    // let parallel_m
+
+    let out_conf = Command::new( "sh" )
+        .arg( "-c" )
+        .arg( conf_string + &out_path +&"-j" + cpus.to_string() )
+        .output()
+        .unwrap()
+        .stdout;
+
+    // println!( "{:?}", &String::from_utf8_lossy( &out_conf ) );
+
+    // let make_out = Command::new( "sh" )
+    //     .arg( "-c" )
+    //     .arg( "." )
+    //     .output()
+    //     .unwrap()
+    //     .stdout;
+
+
+    // let out_conf = Command::new( "sh" )
+    //     .arg( "-c" )
+    //     .arg( "./lib/vips-8.10.6/configure" )
+    //     .output()
+    //     .unwrap()
+    //     .stdout;
+
+
+    // std::panic!();
 
     // Get clang arg to to include glib-2 from pkg-config command
     // should return something like: -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
