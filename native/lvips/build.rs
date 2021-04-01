@@ -1,24 +1,43 @@
 extern crate bindgen;
-extern crate num_cpus;
 use std::process::Command;
 use std::path::PathBuf;
-use std::fs::File;
-use std::io::prelude::*;
+use std::fs;
 use flate2::read::GzDecoder;
 use tar::Archive;
-
-// use reqwest;
+use num_cpus;
 
 fn main() {
 
-    // let tar_gz = reqwest::blocking::get("https://github.com/libvips/libvips/releases/download/v8.10.6/vips-8.10.6.tar.gz").unwrap()
-    //     .bytes().unwrap();
+    let tar_gz = reqwest::blocking::get("https://github.com/libvips/libvips/releases/download/v8.10.6/vips-8.10.6.tar.gz").unwrap()
+        .bytes().unwrap();
 
-    // let tar = GzDecoder::new(&*tar_gz);
-    // let mut archive = Archive::new(tar);
-    // archive.unpack("./lib").unwrap();
+    let tar = GzDecoder::new(&*tar_gz);
+    let mut archive = Archive::new(tar);
+    archive.unpack("./lib").unwrap();
 
     let cpus = num_cpus::get() as u8;
+    let parallel_par = String::from( " -j" ) + &cpus.to_string();
+    println!( "{:?}", parallel_par.to_string() );
+
+
+    Command::new( "sh" )
+        .current_dir( "./lib/vips-8.10.6" )
+        .arg( "-c" )
+        .arg( "./configure" )
+        .output()
+        .unwrap()
+        .stdout;
+    
+
+    let make_out = Command::new( "sh" )
+        .current_dir( "./lib/vips-8.10.6" )
+        .arg( "-c" )
+        .arg( "make -j16" )
+        .output()
+        .unwrap()
+        .stdout;
+
+    println!( "{}", &String::from_utf8_lossy( &make_install_out ) );
 
     let pwd_out = &Command::new( "sh" )
         .arg( "-c" )
@@ -26,41 +45,24 @@ fn main() {
         .output()
         .unwrap()
         .stdout;
+
     let dirty_out_path = String::from_utf8_lossy( &pwd_out );
-    let out_path = String::from( &dirty_out_path[..( dirty_out_path.len() - 1 )] );
+    let pwd_path = String::from( dirty_out_path.trim() );
 
-    let conf_string = String::from( "./lib/vips-8.10.6/configure --prefix=" );
-    // let parallel_m
+    let lib_path = pwd_path + "/lib/vips-8.10.6/tmp";
 
-    let out_conf = Command::new( "sh" )
+    let make_install_arg = String::from( "make install -j16 prefix=" );
+
+    let make_install_out = Command::new( "sh" )
+        .current_dir( "./lib/vips-8.10.6" )
         .arg( "-c" )
-        .arg( conf_string + &out_path +&"-j" + cpus.to_string() )
+        .arg( make_install_arg + &lib_path )
         .output()
         .unwrap()
         .stdout;
 
-    // println!( "{:?}", &String::from_utf8_lossy( &out_conf ) );
+    println!( "{}", &String::from_utf8_lossy( &make_install_out ) );
 
-    // let make_out = Command::new( "sh" )
-    //     .arg( "-c" )
-    //     .arg( "." )
-    //     .output()
-    //     .unwrap()
-    //     .stdout;
-
-
-    // let out_conf = Command::new( "sh" )
-    //     .arg( "-c" )
-    //     .arg( "./lib/vips-8.10.6/configure" )
-    //     .output()
-    //     .unwrap()
-    //     .stdout;
-
-
-    // std::panic!();
-
-    // Get clang arg to to include glib-2 from pkg-config command
-    // should return something like: -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
     let pkg_config_out = Command::new("sh")
         .arg("-c")
         .arg("pkg-config --cflags glib-2.0")
@@ -69,6 +71,7 @@ fn main() {
         .stdout;
 
     let out_str = String::from_utf8_lossy( &pkg_config_out );
+    println!("{}", &out_str);
     let out_paths: Vec<&str> = out_str.split( ' ' )
         .collect();
     let ( glib2_path, glib2_conf_path ) = (
@@ -76,13 +79,14 @@ fn main() {
         out_paths[1].trim(),
     );
 
+
     // Tell cargo to tell rustc to link the system bzip2
     // shared library.
     println!("cargo:rustc-link-lib=glib-2.0");
     println!("cargo:rustc-link-lib=vips");
 
     // Tell cargo to invalidate the built crate whenever the wrapper changes
-    println!("cargo:rerun-if-changed=lib/wrapper.h");
+    println!("cargo:rerun-if-changed=lib/vips-8.10.6/tmp/include/vips/vips.h");
 
     // The bindgen::Builder is the main entry point
     // to bindgen, and lets you build up options for
@@ -90,7 +94,7 @@ fn main() {
     let bindings = bindgen::Builder::default()
         // The input header we would like to generate
         // bindings for.
-        .header("lib/wrapper.h")
+        .header("lib/vips-8.10.6/tmp/include/vips/vips.h")
         .clang_arg( glib2_path )
         .clang_arg( glib2_conf_path )
         // Tell cargo to invalidate the built crate whenever any of the
@@ -127,4 +131,7 @@ fn main() {
     bindings
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
+    
+    fs::remove_dir_all("lib/vips-8.10.6")
+        .unwrap();
 }

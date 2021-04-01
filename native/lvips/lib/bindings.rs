@@ -181,6 +181,9 @@ fn bindgen_test_layout__GThread() {
 pub type GType = gsize;
 pub type GTypeClass = _GTypeClass;
 pub type GTypeInstance = _GTypeInstance;
+#[doc = " GTypeClass:"]
+#[doc = ""]
+#[doc = " An opaque structure used as the base of all classes."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct _GTypeClass {
@@ -209,6 +212,9 @@ fn bindgen_test_layout__GTypeClass() {
         )
     );
 }
+#[doc = " GTypeInstance:"]
+#[doc = ""]
+#[doc = " An opaque structure used as the base of all type instances."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct _GTypeInstance {
@@ -238,6 +244,10 @@ fn bindgen_test_layout__GTypeInstance() {
     );
 }
 pub type GObject = _GObject;
+#[doc = " GObject:"]
+#[doc = ""]
+#[doc = " All the fields in the GObject structure are private"]
+#[doc = " to the #GObject implementation and should never be accessed directly."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct _GObject {
