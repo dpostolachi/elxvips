@@ -301,6 +301,10 @@ fn bindgen_test_layout__GObject() {
 extern "C" {
     pub fn g_object_unref(object: gpointer);
 }
+#[doc = " VipsPel:"]
+#[doc = ""]
+#[doc = " A picture element. Cast this to whatever the associated VipsBandFormat says"]
+#[doc = " to get the value."]
 pub type VipsPel = ::std::os::raw::c_uchar;
 pub type VipsCallbackFn = ::std::option::Option<
     unsafe extern "C" fn(
