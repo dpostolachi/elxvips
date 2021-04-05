@@ -8,6 +8,10 @@ mod libvips;
 use libvips::{VipsImage, VipsFormat};
 use libvips::save_options::{JpegSaveOptions, PngSaveOptions, WebPSaveOptions, SmartcropOptions, Interesting};
 
+#[link(name="vips")]
+extern "C" {
+}
+
 mod atoms {
     rustler::rustler_atoms! {
         atom ok;

@@ -1,0 +1,21 @@
+[package]
+name = "vipsport"
+version = "0.1.0"
+authors = ["dumitras"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "vipsport"
+path = "src/lib.rs"
+crate-type = ["staticlib"]
+
+[dependencies]
+
+[build-dependencies]
+bindgen = "0.53.1"
+reqwest = { version = "0.11.2", features = ["blocking"] }
+flate2 = "1.0.20"
+tar = "0.4.33"
+num_cpus = "1.13.0"

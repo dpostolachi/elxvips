@@ -15,8 +15,4 @@ rustler_codegen = "0.21.1"
 num_cpus = "1.13.0"
 
 [build-dependencies]
-bindgen = "0.53.1"
-reqwest = { version = "0.11.2", features = ["blocking"] }
-flate2 = "1.0.20"
-tar = "0.4.33"
-num_cpus = "1.13.0"
+vipsport = { path = "../vipsport" }

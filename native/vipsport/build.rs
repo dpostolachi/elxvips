@@ -8,36 +8,36 @@ use num_cpus;
 
 fn main() {
 
-    // let tar_gz = reqwest::blocking::get("https://github.com/libvips/libvips/releases/download/v8.10.6/vips-8.10.6.tar.gz").unwrap()
-    //     .bytes().unwrap();
+    let tar_gz = reqwest::blocking::get( "https://github.com/libvips/libvips/releases/download/v8.10.6/vips-8.10.6.tar.gz" ).unwrap()
+        .bytes().unwrap();
 
-    // let tar = GzDecoder::new(&*tar_gz);
-    // let mut archive = Archive::new(tar);
-    // archive.unpack("./lib").unwrap();
+    let tar = GzDecoder::new(&*tar_gz);
+    let mut archive = Archive::new(tar);
+    archive.unpack("./lib").unwrap();
 
     // let cpus = num_cpus::get() as u8;
     // let parallel_par = String::from( " -j" ) + &cpus.to_string();
     // println!( "{:?}", parallel_par.to_string() );
 
 
-    // Command::new( "sh" )
-    //     .current_dir( "./lib/vips-8.10.6" )
-    //     .arg( "-c" )
-    //     .arg( "./configure" )
-    //     .output()
-    //     .unwrap()
-    //     .stdout;
+    Command::new( "sh" )
+        .current_dir( "./lib/vips-8.10.6" )
+        .arg( "-c" )
+        .arg( "./configure" )
+        .output()
+        .unwrap()
+        .stdout;
     
 
-    // let make_out = Command::new( "sh" )
-    //     .current_dir( "./lib/vips-8.10.6" )
-    //     .arg( "-c" )
-    //     .arg( "make -j16" )
-    //     .output()
-    //     .unwrap()
-    //     .stdout;
+    let make_out = Command::new( "sh" )
+        .current_dir( "./lib/vips-8.10.6" )
+        .arg( "-c" )
+        .arg( "make -j16" )
+        .output()
+        .unwrap()
+        .stdout;
 
-    // println!( "{}", &String::from_utf8_lossy( &make_out ) );
+    println!( "{}", &String::from_utf8_lossy( &make_out ) );
 
     let pwd_out = &Command::new( "sh" )
         .arg( "-c" )
@@ -51,17 +51,17 @@ fn main() {
 
     let lib_path = pwd_path + "/lib/vips-8.10.6/tmp";
 
-    // let make_install_arg = String::from( "make install -j16 prefix=" );
+    let make_install_arg = String::from( "make install -j16 prefix=" );
 
-    // let make_install_out = Command::new( "sh" )
-    //     .current_dir( "./lib/vips-8.10.6" )
-    //     .arg( "-c" )
-    //     .arg( make_install_arg + &lib_path )
-    //     .output()
-    //     .unwrap()
-    //     .stdout;
+    let make_install_out = Command::new( "sh" )
+        .current_dir( "./lib/vips-8.10.6" )
+        .arg( "-c" )
+        .arg( make_install_arg + &lib_path )
+        .output()
+        .unwrap()
+        .stdout;
 
-    // println!( "{}", &String::from_utf8_lossy( &make_install_out ) );
+    println!( "{}", &String::from_utf8_lossy( &make_install_out ) );
 
     let pkg_config_out = Command::new("sh")
         .arg("-c")
@@ -89,9 +89,6 @@ fn main() {
     // Tell cargo to tell rustc to link the system bzip2
     // shared library.
     println!("cargo:rustc-link-lib=glib-2.0");
-    println!("cargo:rustc-link-search=/home/dumitras/Projects/elixir/elxvips/native/lvips/lib/vips-8.10.6/tmp/lib");
-    // println!("cargo:cargo:rustc-link-search=lib/vips-8.10.6/tmp/lib");
-    println!("cargo:rustc-link-lib=static=vips");
 
     // Tell cargo to invalidate the built crate whenever the wrapper changes
     println!("cargo:rerun-if-changed=lib/wrapper.h");
@@ -102,7 +99,7 @@ fn main() {
     let bindings = bindgen::Builder::default()
         // The input header we would like to generate
         // bindings for.
-        .header("lib/vips-8.10.6/tmp/include/vips/vips.h")
+        .header("lib/wrapper.h")
         .clang_arg( glib2_path )
         .clang_arg( glib2_conf_path )
         .clang_arg( vips_include_1 )
@@ -137,11 +134,11 @@ fn main() {
         // Unwrap the Result and panic on failure.
         .expect("Unable to generate bindings");
 
-    let out_path = PathBuf::from( "lib" );
+    let out_path = PathBuf::from( "../common" );
     bindings
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
     
-    // fs::remove_dir_all("lib/vips-8.10.6")
-    //     .unwrap();
+    fs::remove_dir_all("lib/vips-8.10.6")
+        .unwrap();
 }
