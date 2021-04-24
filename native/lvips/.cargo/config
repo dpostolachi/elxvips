@@ -1,3 +1,6 @@
+[build]
+rustflags = ["-C", "link-arg=-Wl,-rpath=native/common/lib"]
+
 [target.x86_64-apple-darwin]
 rustflags = [
     "-C", "link-arg=-undefined",

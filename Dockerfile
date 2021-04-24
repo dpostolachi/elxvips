@@ -1,15 +1,11 @@
 # Used for local testing on Debian image
 
-from ubuntu:latest
+from alpine:3.9
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN apt update && \
-    apt install -y wget curl build-essential llvm clang libclang-dev libvips libvips-dev libwebp-dev && \
-    curl https://sh.rustup.rs -sSf | sh -s -- -y && \
-    wget https://packages.erlang-solutions.com/erlang-solutions_2.0_all.deb && \
-    dpkg -i erlang-solutions_2.0_all.deb && \
-    apt update && \
-    apt install -y esl-erlang elixir
+RUN apk update && \
+    apk add wget curl build-base make glib glib-dev elixir openssl libwebp expat pkgconfig libressl-dev clang-libs llvm llvm-dev expat-dev && \
+    curl https://sh.rustup.rs -sSf | sh -s -- -y
 
 ENV PATH /root/.cargo/bin:$PATH
 

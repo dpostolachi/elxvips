@@ -27,3 +27,6 @@ elxvips-*.tar
 target
 
 .DS_Store
+
+/native/common/include/
+/native/common/lib/
