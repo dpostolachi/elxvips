@@ -8,17 +8,6 @@ RUN apk update && \
     curl https://sh.rustup.rs -sSf | sh -s -- -y
 
 ENV PATH /root/.cargo/bin:$PATH
-ENV RUSTFLAGS "-C target-feature=-crt-static"
-
-# RUN wget https://github.com/libvips/libvips/releases/download/v8.10.6/vips-8.10.6.tar.gz
-# RUN tar -xf vips-8.10.6.tar.gz
-# RUN cd vips-8.10.6 && \
-#   ./configure && \
-#   make -j16 && \
-#   make install -j16
-
-
-# RUN 
 
 WORKDIR /usr/src/app
 
