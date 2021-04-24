@@ -9,7 +9,7 @@ edition = "2018"
 [lib]
 name = "vipsport"
 path = "src/lib.rs"
-crate-type = ["staticlib"]
+crate-type = ["dylib"]
 
 [dependencies]
 

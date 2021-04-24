@@ -181,9 +181,6 @@ fn bindgen_test_layout__GThread() {
 pub type GType = gsize;
 pub type GTypeClass = _GTypeClass;
 pub type GTypeInstance = _GTypeInstance;
-#[doc = " GTypeClass:"]
-#[doc = ""]
-#[doc = " An opaque structure used as the base of all classes."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct _GTypeClass {
@@ -212,9 +209,6 @@ fn bindgen_test_layout__GTypeClass() {
         )
     );
 }
-#[doc = " GTypeInstance:"]
-#[doc = ""]
-#[doc = " An opaque structure used as the base of all type instances."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct _GTypeInstance {
@@ -244,10 +238,6 @@ fn bindgen_test_layout__GTypeInstance() {
     );
 }
 pub type GObject = _GObject;
-#[doc = " GObject:"]
-#[doc = ""]
-#[doc = " All the fields in the GObject structure are private"]
-#[doc = " to the #GObject implementation and should never be accessed directly."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct _GObject {
@@ -301,10 +291,6 @@ fn bindgen_test_layout__GObject() {
 extern "C" {
     pub fn g_object_unref(object: gpointer);
 }
-#[doc = " VipsPel:"]
-#[doc = ""]
-#[doc = " A picture element. Cast this to whatever the associated VipsBandFormat says"]
-#[doc = " to get the value."]
 pub type VipsPel = ::std::os::raw::c_uchar;
 pub type VipsCallbackFn = ::std::option::Option<
     unsafe extern "C" fn(
@@ -1889,6 +1875,21 @@ extern "C" {
 }
 extern "C" {
     pub fn vips_jpegsave_buffer(
+        in_: *mut VipsImage,
+        buf: *mut *mut ::std::os::raw::c_void,
+        len: *mut size_t,
+        ...
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn vips_webpsave(
+        in_: *mut VipsImage,
+        filename: *const ::std::os::raw::c_char,
+        ...
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn vips_webpsave_buffer(
         in_: *mut VipsImage,
         buf: *mut *mut ::std::os::raw::c_void,
         len: *mut size_t,

@@ -13,6 +13,7 @@ crate-type = ["dylib"]
 rustler = "0.21.1"
 rustler_codegen = "0.21.1"
 num_cpus = "1.13.0"
+vipsport = { path = "../vipsport" }
 
 [build-dependencies]
 vipsport = { path = "../vipsport" }
