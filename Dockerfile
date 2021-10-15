@@ -1,15 +1,17 @@
 # Used for local testing on Debian image
 
-from ubuntu:latest
-ARG DEBIAN_FRONTEND=noninteractive
-
-RUN apt update && \
-    apt install -y wget curl build-essential llvm clang libclang-dev libvips libvips-dev libwebp-dev && \
-    curl https://sh.rustup.rs -sSf | sh -s -- -y && \
-    wget https://packages.erlang-solutions.com/erlang-solutions_2.0_all.deb && \
-    dpkg -i erlang-solutions_2.0_all.deb && \
-    apt update && \
-    apt install -y esl-erlang elixir
+FROM alpine:3.13
+RUN apk --no-cache add \
+  elixir \
+  vips \
+  vips-dev \
+  rust \
+  cargo \
+  clang \
+  build-base \
+  git \
+  libc6-compat \
+  libwebp-dev
 
 ENV PATH /root/.cargo/bin:$PATH
 
