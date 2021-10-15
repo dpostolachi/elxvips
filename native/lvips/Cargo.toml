@@ -1,17 +1,16 @@
 [package]
 name = "lvips"
-version = "0.1.0"
+version = "0.1.1"
 authors = []
 edition = "2018"
 
 [lib]
 name = "lvips"
 path = "src/lib.rs"
-crate-type = ["dylib"]
+crate-type = ["cdylib"]
 
 [dependencies]
-rustler = "0.21.1"
-rustler_codegen = "0.21.1"
+rustler = "0.22.2"
 num_cpus = "1.13.0"
 
 [build-dependencies]
