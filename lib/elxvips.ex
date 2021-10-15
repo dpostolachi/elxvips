@@ -21,8 +21,8 @@ defmodule Elxvips.ImageFile do
   defstruct [
     path: :nil,
     resize: %Elxvips.ResizeOptions{
-      :width => :auto,
-      :height => :auto,
+      :width => 0,
+      :height => 0,
       :resize_type => :auto,
     },
     save: %Elxvips.SaveOptions{}
@@ -33,8 +33,8 @@ defmodule Elxvips.ImageBytes do
   defstruct [
     bytes: nil,
     resize: %Elxvips.ResizeOptions{
-      :width => :auto,
-      :height => :auto,
+      :width => 0,
+      :height => 0,
       :resize_type => :auto,
     },
     save: %Elxvips.SaveOptions{},
