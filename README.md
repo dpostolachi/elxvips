@@ -16,7 +16,7 @@ Full documentation can be found at [https://hexdocs.pm/elxvips](https://hexdocs.
 # install rust if not already installed
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
-brew install vips pkg-config
+brew install vips llvm
 ```
 
 #### Ubuntu/Debian
@@ -24,7 +24,7 @@ brew install vips pkg-config
 # install rust if not already installed
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
-apt install libvips-dev pkg-config
+apt install libvips-dev rustc clang
 ```
 
 The [package](https://hex.pm/packages/elxvips) can be installed by adding `elxvips` to your list of dependencies in `mix.exs`:
