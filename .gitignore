@@ -27,3 +27,6 @@ elxvips-*.tar
 target
 
 .DS_Store
+
+# Bindings, platform dependent
+/native/lvips/lib/bindings.rs
