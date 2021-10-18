@@ -2,13 +2,23 @@ extern crate bindgen;
 use std::process::Command;
 use std::path::PathBuf;
 
+#[cfg(target_os = "macos")]
+fn extra_build_steps() {
+    // link brew libraries
+    println!(r"cargo:rustc-link-search=/opt/homebrew/lib");
+}
+
+#[cfg(not(target_os = "macos"))]
+fn extra_build_steps() {
+}
+
 fn main() {
 
-    // Get clang arg to to include glib-2 from pkg-config command
-    // should return something like: -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include
+    // Get vips dependencies
+    // should return something like: -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include ...
     let pkg_config_out = Command::new("sh")
         .arg("-c")
-        .arg("pkg-config --cflags glib-2.0")
+        .arg("pkg-config --cflags --libs vips")
         .output()
         .unwrap()
         .stdout;
@@ -17,8 +27,11 @@ fn main() {
     let flags: Vec<&str> = out_str.split( ' ' )
         .map( | part | part.trim() )
         .collect();
-
-    // Tell cargo to tell rustc to link the system bzip2
+    
+    // extra steps for platform
+    extra_build_steps();
+    
+    // Tell cargo to tell rustc to link the system vips and glib-2.0
     // shared library.
     println!("cargo:rustc-link-lib=glib-2.0");
     println!("cargo:rustc-link-lib=vips");
