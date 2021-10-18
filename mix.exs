@@ -17,7 +17,7 @@ defmodule Elxvips.MixProject do
     [
         name: "elxvips",
         files: [ "lib", "mix.exs", "native/lvips/build.rs", "native/lvips/src/**/*.rs", "native/lvips/lib/**/*.rs", "native/**/*.h", "native/**/Cargo.lock", "native/**/Cargo.toml", "README.md" ],
-        exclude_patterns: ["native/lvips/src/libvips/bindings.rs"],
+        exclude_patterns: ["native/lvips/**/*.build.rs"],
         licenses: [ "MIT" ],
         links: %{
             "GitHub" => "https://github.com/dpostolachi/elxvips"

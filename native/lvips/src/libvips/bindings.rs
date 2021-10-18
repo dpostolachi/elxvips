@@ -3,4 +3,4 @@
 #![allow(non_snake_case)]
 #![allow(unused)]
 
-include!(concat!("../../lib/bindings.rs"));
+include!(concat!("../../lib/bindings.build.rs"));
