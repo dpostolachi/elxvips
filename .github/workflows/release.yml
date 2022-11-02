@@ -65,7 +65,7 @@ jobs:
       shell: bash
       run: |
         if [[ "${{ matrix.job.target }}" == *"-linux-musl"* ]]; then
-          echo "Musl"
+          RUSTFLAGS="-C target-feature=-crt-static"
         fi
     - name: Extract crate information
       shell: bash
