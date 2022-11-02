@@ -64,7 +64,7 @@ jobs:
     - name: Check job
       shell: bash
       run: |
-        if [[ {{ matrix.job.target }} == *"-linux-musl"* ]]; then
+        if [[ "${{ matrix.job.target }}" == *"-linux-musl"* ]]; then
           echo "Musl"
         fi
     - name: Extract crate information
