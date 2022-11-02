@@ -53,7 +53,7 @@ jobs:
       shell: bash
       run: |
         if [ "$RUNNER_OS" == "Linux" ]; then
-                sudo apt-get -y install libvips-dev clang musl-tools llvm
+                sudo apt-get -y install libvips-dev clang musl-tools llvm linux-musl-dev
           elif [ "$RUNNER_OS" == "macOS" ]; then
                 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" ; brew install vips llvm
           else
