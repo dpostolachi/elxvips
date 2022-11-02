@@ -61,21 +61,12 @@ jobs:
                 echo "$RUNNER_OS skipping"
         fi
   
-    - name: Install dependencies
-      shell: bash
-      run: |
-        if [ "$RUNNER_OS" == "Linux" ]; then
-                sudo apt-get -y install gcc-aarch64-linux-gnu libvips-dev clang 
-          elif [ "$RUNNER_OS" == "macOS" ]; then
-                /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" ; brew install vips llvm
-          else
-                echo "$RUNNER_OS skipping"
-        fi
     - name: Check job
       shell: bash
       run: |
-        echo ${{ matrix.job.target }}
-
+        if [[ {{ matrix.job.target }} == *"-linux-musl"* ]]; then
+          echo "Musl"
+        fi
     - name: Extract crate information
       shell: bash
       run: |
