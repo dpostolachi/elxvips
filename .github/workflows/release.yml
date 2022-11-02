@@ -71,6 +71,10 @@ jobs:
           else
                 echo "$RUNNER_OS skipping"
         fi
+    - name: Check job
+      shell: bash
+      run: |
+        echo ${{ matrix.job.target }}
 
     - name: Extract crate information
       shell: bash
