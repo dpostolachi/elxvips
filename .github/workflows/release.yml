@@ -23,7 +23,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        nif: ["2.16", "2.15", "2.14"]
+        nif: ["2.16"]
+        # nif: ["2.16", "2.15", "2.14"]
         job:
           - { target: arm-unknown-linux-gnueabihf , os: ubuntu-20.04 , use-cross: true }
           - { target: aarch64-unknown-linux-gnu   , os: ubuntu-20.04 , use-cross: true }
@@ -31,8 +32,8 @@ jobs:
           - { target: x86_64-apple-darwin         , os: macos-11      }
           - { target: x86_64-unknown-linux-gnu    , os: ubuntu-20.04  }
           - { target: x86_64-unknown-linux-musl   , os: ubuntu-20.04 , use-cross: true }
-          - { target: x86_64-pc-windows-gnu       , os: windows-2019  }
-          - { target: x86_64-pc-windows-msvc      , os: windows-2019  }
+          # - { target: x86_64-pc-windows-gnu       , os: windows-2019  }
+          # - { target: x86_64-pc-windows-msvc      , os: windows-2019  }
 
     env:
       RUSTLER_NIF_VERSION: ${{ matrix.nif }}
@@ -49,6 +50,17 @@ jobs:
           apple-darwin) /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" ; brew install vips llvm ;;
         esac
 
+    - name: Install dependencies
+      shell: bash
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+                sudo apt-get -y install libvips-dev clang musl-tools
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+                /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" ; brew install vips llvm
+          else
+                echo "$RUNNER_OS skipping"
+        fi
+  
     - name: Install dependencies
       shell: bash
       run: |
