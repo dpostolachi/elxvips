@@ -15,8 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         nif: ["2.16"]
-        os: ubuntu-20.04
-        # nif: ["2.16", "2.15"]
+        os: [ ubuntu-20.04 ]
         job:
           # - { target: arm-unknown-linux-gnueabihf , os: ubuntu-20.04 , use-cross: true }
           # - { target: aarch64-unknown-linux-gnu   , os: ubuntu-20.04 , use-cross: true }
