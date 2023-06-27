@@ -11,7 +11,8 @@ jobs:
   build_release:
     name: NIF ${{ matrix.nif }} - ${{ matrix.job.target }} (${{ matrix.job.os }})
     # runs-on: self-hosted
-    runs-on: ${{ matrix.job.os }}
+    # runs-on: ${{ matrix.job.os }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -45,16 +46,16 @@ jobs:
         toolchain: stable
         target: ${{ matrix.job.target }}
 
-    - name: Install dependencies
-      shell: bash
-      run: |
-        if [ "$RUNNER_OS" == "Linux" ]; then
-                sudo apt-get -y update; sudo apt-get -y install libvips-dev clang musl-tools llvm
-          elif [ "$RUNNER_OS" == "macOS" ]; then
-                /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" ; brew install vips llvm
-          else
-                echo "$RUNNER_OS skipping"
-        fi
+    # - name: Install dependencies
+    #   shell: bash
+    #   run: |
+    #     if [ "$RUNNER_OS" == "Linux" ]; then
+    #             sudo apt-get -y update; sudo apt-get -y install libvips-dev clang musl-tools llvm
+    #       elif [ "$RUNNER_OS" == "macOS" ]; then
+    #             /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" ; brew install vips llvm
+    #       else
+    #             echo "$RUNNER_OS skipping"
+    #     fi
 
     - name: Build the project
       id: build-crate
