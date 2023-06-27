@@ -10,11 +10,12 @@ on:
 jobs:
   build_release:
     name: NIF ${{ matrix.nif }} - ${{ matrix.job.target }} (${{ matrix.job.os }})
-    runs-on: [ self-hosted, ${{ matrix.job.os }} ]
+    runs-on: self-hosted
     strategy:
       fail-fast: false
       matrix:
         nif: ["2.16"]
+        os: ${{ matrix.job.os }}
         # nif: ["2.16", "2.15"]
         job:
           # - { target: arm-unknown-linux-gnueabihf , os: ubuntu-20.04 , use-cross: true }
