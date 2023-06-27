@@ -30,3 +30,5 @@ target
 
 # Bindings, platform dependent
 native/lvips/lib/bindings.build.rs
+
+.github/runner
