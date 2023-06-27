@@ -10,8 +10,7 @@ on:
 jobs:
   build_release:
     name: NIF ${{ matrix.nif }} - ${{ matrix.job.target }} (${{ matrix.job.os }})
-    # runs-on: ${{ matrix.job.os }}
-    runs-on: self-hosted
+    runs-on: [ self-hosted, ${{ matrix.job.os }} ]
     strategy:
       fail-fast: false
       matrix:
