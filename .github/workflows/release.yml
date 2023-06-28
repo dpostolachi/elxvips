@@ -56,11 +56,15 @@ jobs:
       shell: bash
       run: |
         if [ "$RUNNER_OS" == "Linux" ]; then
+                sudo ls -a /etc/apt;\
                 echo "deb [arch=arm64] http://ports.ubuntu.com/ focal main multiverse universe" | sudo tee -a /etc/apt/sources.lst;\
                 echo "deb [arch=arm64] http://ports.ubuntu.com/ focal-security main multiverse universe" | sudo tee -a /etc/apt/sources.lst;\
                 echo "deb [arch=arm64] http://ports.ubuntu.com/ focal-backports main multiverse universe" | sudo tee -a /etc/apt/sources.lst;\
                 echo "deb [arch=arm64] http://ports.ubuntu.com/ focal-updates main multiverse universe" | sudo tee -a /etc/apt/sources.lst;\
-                sudo cat /etc/apt/sources.lst; sudo dpkg --add-architecture arm64; sudo apt-get -y update; sudo apt-get -y install libvips-dev:arm64 clang libclang-dev musl-tools llvm musl-tools musl-dev
+                sudo cat /etc/apt/sources.lst;\
+                sudo dpkg --add-architecture arm64;\
+                sudo apt-get -y update;\
+                sudo apt-get -y install libvips-dev:arm64 clang libclang-dev musl-tools llvm musl-tools musl-dev
           elif [ "$RUNNER_OS" == "macOS" ]; then
                 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" ; brew install vips
           else
