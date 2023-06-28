@@ -4,4 +4,4 @@ passthrough = [
 ]
 
 [target.aarch64-unknown-linux-gnu]
-pre-build = ["dpkg --add-architecture arm64 && apt-get update && apt-get install -y libvips-dev:arm64"]
+pre-build = ["apt-get update && apt-get install -y libvips-dev"]
