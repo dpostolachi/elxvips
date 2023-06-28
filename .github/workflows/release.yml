@@ -65,7 +65,7 @@ jobs:
                 sudo cat /etc/apt/sources.list;\
                 sudo dpkg --add-architecture arm64;\
                 sudo apt-get -y update;\
-                sudo apt-get -y install libvips-dev:arm64 clang libclang-dev musl-tools llvm musl-tools musl-dev
+                sudo apt-get -y -f install libvips-dev:arm64 clang libclang-dev musl-tools llvm musl-tools musl-dev
           elif [ "$RUNNER_OS" == "macOS" ]; then
                 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" ; brew install vips
           else
