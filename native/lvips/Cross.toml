@@ -4,4 +4,4 @@ passthrough = [
 ]
 
 [target.aarch64-unknown-linux-gnu]
-pre-build = ["apt-get install -y libvips-dev clang clang-dev"]
+pre-build = ["apt update && apt-get install -y libvips-dev clang clang-dev"]
