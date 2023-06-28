@@ -58,7 +58,7 @@ jobs:
         if [ "$RUNNER_OS" == "Linux" ]; then
                 sudo apt-get -y update; sudo apt-get -y install libvips-dev clang libclang-dev musl-tools llvm musl-tools musl-dev
           elif [ "$RUNNER_OS" == "macOS" ]; then
-                /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" ; brew install vips llvm
+                /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" ; brew install vips
           else
                 echo "$RUNNER_OS skipping"
         fi
