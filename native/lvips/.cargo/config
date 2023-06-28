@@ -1,3 +1,6 @@
+[profile.release]
+lto = true
+
 [target.x86_64-apple-darwin]
 rustflags = [
   "-C", "link-arg=-undefined",
@@ -10,10 +13,17 @@ rustflags = [
   "-C", "link-arg=dynamic_lookup",
 ]
 
+[target.arm-unknown-linux-gnueabihf]
+linker = "arm-linux-gnueabihf-gcc"
+
 # See https://github.com/rust-lang/rust/issues/59302
 [target.x86_64-unknown-linux-musl]
-linker = "ld"
-rustflags = ["-Ctarget-feature=-crt-static", "-Clink-self-contained=on", "-L/usr/lib/x86_64-linux-musl", "-Clink-args=--dynamic-linker /lib/ld-musl-x86_64.so.1"]
+rustflags = [
+  "-C", "target-feature=-crt-static"
+]
 
-[profile.release]
-lto = true
+# Same as above
+[target.aarch64-unknown-linux-musl]
+rustflags = [
+  "-C", "target-feature=-crt-static"
+]
