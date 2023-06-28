@@ -15,9 +15,13 @@ rustflags = [
 
 [target.arm-unknown-linux-gnueabihf]
 linker = "arm-linux-gnueabihf-gcc"
+rustflags = [
+  "-C", "target-feature=-crt-static"
+]
 
 # See https://github.com/rust-lang/rust/issues/59302
 [target.x86_64-unknown-linux-musl]
+linker = "rust-lld"
 rustflags = [
   "-C", "target-feature=-crt-static"
 ]
