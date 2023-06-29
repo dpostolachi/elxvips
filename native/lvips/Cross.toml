@@ -12,7 +12,7 @@ passthrough = [
 pre-build = [
   """
     export DEBIAN_FRONTEND=noninteractive &&\
-    apt-get install -y vips-dev
+    apt-get install -y libvips-dev
   """
 ]
 
@@ -21,7 +21,7 @@ pre-build = [
 pre-build = [
   """
     export DEBIAN_FRONTEND=noninteractive &&\
-    apt-get install -y vips-dev
+    apt-get install -y libvips-dev
   """
 ]
 
