@@ -30,7 +30,7 @@ pre-build = [
 image = "aarch64-apple-darwin-cross"
 pre-build = [
   """
-    brew install vips
+    brew install vips podman
   """
 ]
 
@@ -38,6 +38,6 @@ pre-build = [
 image = "x86_64-apple-darwin-cross"
 pre-build = [
   """
-    brew install vips
+    brew install vips podman
   """
 ]
