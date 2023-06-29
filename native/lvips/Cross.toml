@@ -15,22 +15,11 @@ pre-build = ["""
 pre-build = ["export DEBIAN_FRONTEND=noninteractive && dpkg --add-architecture $CROSS_DEB_ARCH && apt update && apt-get install -y libvips-dev clang libclang-dev libc6-dev-i386"]
 
 [target.x86_64-unknown-linux-musl]
-# pre-build = [
-#   """
-#     export DEBIAN_FRONTEND=noninteractive && \
-#     apt update && \
-#     apt install -y curl pip && \
-#     pip install staticx && \
-#     mkdir vips_build && \
-#     curl -sL https://github.com/libvips/libvips/releases/download/v8.9.2/vips-8.9.2.tar.gz | tar -xz -f- --strip-components=1 -C ./vips_build && \
-#     cd vips_build
-#   """
-# ]
 pre-build = [
   """
     export DEBIAN_FRONTEND=noninteractive &&\
     apt update &&\
-    apt-get install -y libvips-dev
+    apt-get install -y libvips-dev non-existing
   """
 ]
 # pre-build = [
