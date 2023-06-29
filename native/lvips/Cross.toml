@@ -4,11 +4,10 @@ passthrough = [
 ]
 
 [target.aarch64-unknown-linux-gnu]
+image = "arm64v8/ubuntu:20.04"
 pre-build = ["""
-    export DEBIAN_FRONTEND=noninteractive &&\
-    dpkg --add-architecture arm64 &&\
     apt update &&\
-    apt-get install -y--no-install-recommends libvips:arm64 clang:arm64 libclang-dev:arm64 libc6-dev:arm64
+    apt-get install -y --no-install-recommends libvips clang libclang-dev libc6-dev
 """]
 
 [target.arm-unknown-linux-gnueabihf]
@@ -16,14 +15,22 @@ pre-build = ["export DEBIAN_FRONTEND=noninteractive && dpkg --add-architecture $
 
 [target.x86_64-unknown-linux-musl]
 image = "amd64/alpine:3.18"
-toolchain = "stable-x86_64-unknown-linux-musl"
 pre-build = [
   """
-    apk --no-cache add vips vips-dev clang clang-dev libgcc build-base libc6-compat libwebp-dev &&\
-    export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUSTFLAGS="-C target-feature=-crt-static" &&\
-    export RUST_BACKTRACE=1
+    apk --no-cache add curl &&\
+    curl –proto ‘=https’ –tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y &&\
+    source "$HOME/.cargo/env" &&\
+    rustup target add x86_64-unknown-linux-musl
   """
 ]
+# pre-build = [
+#   """
+#     apk --no-cache add vips vips-dev clang clang-dev libgcc build-base libc6-compat libwebp-dev rust cargo rustup &&\
+#     export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUSTFLAGS="-C target-feature=-crt-static" &&\
+#     rustup target add x86_64-unknown-linux-musl &&\
+#     export RUST_BACKTRACE=1
+#   """
+# ]
 # pre-build = [
 #   """
 #     export RUST_BACKTRACE=1 &&\
