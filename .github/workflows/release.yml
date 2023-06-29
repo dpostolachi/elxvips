@@ -58,7 +58,7 @@ jobs:
       shell: bash
       run: |
         brew install vips || echo 1
-        apt install libvips-dev || echo 1
+        sudo apt-get install libvips-dev || echo 1
 
     - name: Build the project
       id: build-crate
