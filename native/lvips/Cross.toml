@@ -17,7 +17,7 @@ pre-build = ["export DEBIAN_FRONTEND=noninteractive && dpkg --add-architecture $
 [target.x86_64-unknown-linux-musl]
 pre-build = [
   """
-    apk --no-cache add vips vips-dev clang clang-dev build-base libc6-compat libwebp-dev &&\
+    apk --no-cache add vips vips-dev clang clang-dev build-base libc6-compat gcompat libwebp-dev &&\
     export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUSTFLAGS="-C target-feature=-crt-static" &&\
     export RUST_BACKTRACE=1
   """
