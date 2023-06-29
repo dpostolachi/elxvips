@@ -36,8 +36,8 @@ pre-build = [
 
 [target.x86_64-apple-darwin ]
 image = "x86_64-apple-darwin-cross"
-pre-build = [
-  """
-    brew install vips
-  """
-]
+# pre-build = [
+#   """
+#     brew install vips
+#   """
+# ]
