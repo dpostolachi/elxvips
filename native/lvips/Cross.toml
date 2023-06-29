@@ -8,6 +8,7 @@ pre-build = [
   """
     export DEBIAN_FRONTEND=noninteractive &&\
     dpkg --add-architecture arm64 &&\
+    apt-get update &&\
     apt-get install -y libvips-dev:arm64 gcc make gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
   """
 ]
