@@ -33,7 +33,7 @@ pre-build = [
   """
 ]
 
-[x86_64-apple-darwin ]
+[target.x86_64-apple-darwin ]
 pre-build = [
   """
     brew install vips
