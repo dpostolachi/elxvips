@@ -25,14 +25,14 @@ jobs:
       matrix:
         nif: ["2.16"]
         job:
-          # - { target: arm-unknown-linux-gnueabihf , os: ubuntu-20.04 , use-cross: true }
-          - { target: aarch64-unknown-linux-gnu   , os: ubuntu-22.04 , use-cross: true, rustcflags: "-C target-feature=-crt-static", flagname: "CARGO_TARGET_UNKNOWN_LINUX_MUSL_RUSTFLAGS" }
-          # - { target: aarch64-apple-darwin        , os: macos-11      }
-          # - { target: x86_64-apple-darwin         , os: macos-11      }
-          # - { target: x86_64-unknown-linux-gnu    , os: ubuntu-20.04  }
-          - { target: x86_64-unknown-linux-musl   , os: ubuntu-22.04 , use-cross: true, rustcflags: "-C target-feature=-crt-static", flagname: "CARGO_TARGET_UNKNOWN_LINUX_MUSL_RUSTFLAGS" }
-          # - { target: x86_64-pc-windows-gnu       , os: windows-2019  }
-          # - { target: x86_64-pc-windows-msvc      , os: windows-2019  }
+          - { target: arm-unknown-linux-gnueabihf , os: ubuntu-20.04 ,  use-cross: true,    rustcflags: "",                                 flagname: "UNKNOWN" }
+          - { target: aarch64-unknown-linux-gnu   , os: ubuntu-22.04 ,  use-cross: true,    rustcflags: "-C target-feature=-crt-static",    flagname: "CARGO_TARGET_UNKNOWN_LINUX_MUSL_RUSTFLAGS" }
+          - { target: aarch64-apple-darwin        , os: macos-11     ,                      rustcflags: "",                                 flagname: "UNKNOWN" }
+          - { target: x86_64-apple-darwin         , os: macos-11     ,                      rustcflags: "",                                 flagname: "UNKNOWN"}
+          - { target: x86_64-unknown-linux-gnu    , os: ubuntu-20.04 ,                      rustcflags: "",                                 flagname: "UNKNOWN"}
+          - { target: x86_64-unknown-linux-musl   , os: ubuntu-22.04 ,  use-cross: true,    rustcflags: "-C target-feature=-crt-static",    flagname: "CARGO_TARGET_UNKNOWN_LINUX_MUSL_RUSTFLAGS" }
+          # - { target: x86_64-pc-windows-gnu       , os: windows-2019 ,                      rustcflags: "",                                 flagname: "UNKNOWN" }
+          # - { target: x86_64-pc-windows-msvc      , os: windows-2019 ,                      rustcflags: "",                                 flagname: "UNKNOWN" }
 
     env:
       RUSTLER_NIF_VERSION: ${{ matrix.nif }}
@@ -53,17 +53,6 @@ jobs:
       with:
         toolchain: stable
         target: ${{ matrix.job.target }}
-
-    # - name: Install dependencies
-    #   shell: bash
-    #   run: |
-    #     if [ "$RUNNER_OS" == "Linux" ]; then
-    #             sudo apt-get -y update; sudo apt-get -y install libvips-dev clang libclang-dev musl-tools llvm musl-tools musl-dev
-    #       elif [ "$RUNNER_OS" == "macOS" ]; then
-    #             /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" ; brew install vips
-    #       else
-    #             echo "$RUNNER_OS skipping"
-    #     fi
 
     - name: Build the project
       id: build-crate
@@ -88,76 +77,3 @@ jobs:
         files: |
           ${{ steps.build-crate.outputs.file-path }}
       if: startsWith(github.ref, 'refs/tags/')
-# Older
-
-# jobs:
-#   build_release:
-#     name: NIF ${{ matrix.nif }} - ${{ matrix.job.target }} (${{ matrix.job.os }})
-#     runs-on: self-hosted
-#     strategy:
-#       fail-fast: false
-#       matrix:
-#         nif: ["2.16"]
-#         os: [ ubuntu-20.04 ]
-#         job:
-#           # - { target: arm-unknown-linux-gnueabihf , os: ubuntu-20.04 , use-cross: true }
-#           # - { target: aarch64-unknown-linux-gnu   , os: ubuntu-20.04 , use-cross: true }
-#           # - { target: aarch64-unknown-linux-musl  , os: ubuntu-20.04 , use-cross: true }
-#           # - { target: aarch64-apple-darwin        , os: macos-11      }
-#           # - { target: riscv64gc-unknown-linux-gnu , os: ubuntu-20.04 , use-cross: true }
-#           # - { target: x86_64-apple-darwin         , os: macos-11      }
-#           - { target: x86_64-unknown-linux-gnu    , os: ubuntu-20.04  }
-#           # - { target: x86_64-unknown-linux-musl   , os: ubuntu-20.04 , use-cross: true }
-#           # - { target: x86_64-pc-windows-gnu       , os: windows-2019  }
-#           # - { target: x86_64-pc-windows-msvc      , os: windows-2019  }
-
-#     steps:
-#     - name: Checkout source code
-#       uses: actions/checkout@v3
-
-#     - name: Extract project version
-#       shell: bash
-#       run: |
-#         # Get the project version from mix.exs
-#         echo "PROJECT_VERSION=$(sed -n 's/^  @version "\(.*\)"/\1/p' mix.exs | head -n1)" >> $GITHUB_ENV
-
-#     - name: Install Rust toolchain
-#       uses: dtolnay/rust-toolchain@stable
-#       with:
-#         toolchain: stable
-#         target: ${{ matrix.job.target }}
-
-#     - name: Install dependencies
-#       shell: bash
-#       run: |
-#         if [ "$RUNNER_OS" == "Linux" ]; then
-#                 sudo apt-get -y update; sudo apt-get -y install libvips-dev clang musl-tools llvm
-#           elif [ "$RUNNER_OS" == "macOS" ]; then
-#                 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" ; brew install vips llvm
-#           else
-#                 echo "$RUNNER_OS skipping"
-#         fi
-
-#     - name: Build the project
-#       id: build-crate
-#       uses: philss/rustler-precompiled-action@v1.0.1
-#       with:
-#         project-name: lvips
-#         project-version: ${{ env.PROJECT_VERSION }}
-#         target: ${{ matrix.job.target }}
-#         nif-version: ${{ matrix.nif }}
-#         use-cross: ${{ matrix.job.use-cross }}
-#         project-dir: "native/lvips"
-
-#     - name: Artifact upload
-#       uses: actions/upload-artifact@v3
-#       with:
-#         name: ${{ steps.build-crate.outputs.file-name }}
-#         path: ${{ steps.build-crate.outputs.file-path }}
-
-#     - name: Publish archives and packages
-#       uses: softprops/action-gh-release@v1
-#       with:
-#         files: |
-#           ${{ steps.build-crate.outputs.file-path }}
-#       if: startsWith(github.ref, 'refs/tags/')
