@@ -25,12 +25,12 @@ jobs:
       matrix:
         nif: ["2.16"]
         job:
-          - { target: arm-unknown-linux-gnueabihf , os: ubuntu-20.04 ,  use-cross: true,    rustcflags: "",                                 flagname: "UNKNOWN" }
-          - { target: aarch64-unknown-linux-gnu   , os: ubuntu-22.04 ,  use-cross: true,    rustcflags: "-C target-feature=-crt-static",    flagname: "CARGO_TARGET_UNKNOWN_LINUX_MUSL_RUSTFLAGS" }
-          - { target: aarch64-apple-darwin        , os: macos-11     ,  use-cross: true,    rustcflags: "",                                 flagname: "UNKNOWN" }
+          # - { target: arm-unknown-linux-gnueabihf , os: ubuntu-20.04 ,  use-cross: true,    rustcflags: "",                                 flagname: "UNKNOWN" }
+          # - { target: aarch64-unknown-linux-gnu   , os: ubuntu-22.04 ,  use-cross: true,    rustcflags: "-C target-feature=-crt-static",    flagname: "CARGO_TARGET_UNKNOWN_LINUX_MUSL_RUSTFLAGS" }
+          # - { target: aarch64-apple-darwin        , os: macos-11     ,  use-cross: true,    rustcflags: "",                                 flagname: "UNKNOWN" }
           - { target: x86_64-apple-darwin         , os: macos-11     ,  use-cross: true,    rustcflags: "",                                 flagname: "UNKNOWN"}
-          - { target: x86_64-unknown-linux-gnu    , os: ubuntu-20.04 ,  use-cross: true,    rustcflags: "",                                 flagname: "UNKNOWN"}
-          - { target: x86_64-unknown-linux-musl   , os: ubuntu-22.04 ,  use-cross: true,    rustcflags: "-C target-feature=-crt-static",    flagname: "CARGO_TARGET_UNKNOWN_LINUX_MUSL_RUSTFLAGS" }
+          # - { target: x86_64-unknown-linux-gnu    , os: ubuntu-20.04 ,  use-cross: true,    rustcflags: "",                                 flagname: "UNKNOWN"}
+          # - { target: x86_64-unknown-linux-musl   , os: ubuntu-22.04 ,  use-cross: true,    rustcflags: "-C target-feature=-crt-static",    flagname: "CARGO_TARGET_UNKNOWN_LINUX_MUSL_RUSTFLAGS" }
           # - { target: x86_64-pc-windows-gnu       , os: windows-2019 ,                      rustcflags: "",                                 flagname: "UNKNOWN" }
           # - { target: x86_64-pc-windows-msvc      , os: windows-2019 ,                      rustcflags: "",                                 flagname: "UNKNOWN" }
 
