@@ -24,7 +24,6 @@ pre-build = [
     export RUST_BACKTRACE=1
   """
 ]
-]
 # pre-build = [
 #   """
 #     export RUST_BACKTRACE=1 &&\
