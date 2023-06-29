@@ -56,7 +56,7 @@ jobs:
 
     - name: Build the project
       id: build-crate
-      uses: philss/rustler-precompiled-action@v1.0.1
+      uses: dpostolachi/rustler-precompiled-action@main
       with:
         project-name: lvips
         project-version: ${{ env.PROJECT_VERSION }}
