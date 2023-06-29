@@ -46,6 +46,7 @@ jobs:
         # Get the project version from mix.exs
         echo "PROJECT_VERSION=$(sed -n 's/^  @version "\(.*\)"/\1/p' mix.exs | head -n1)" >> $GITHUB_ENV
         export ${{ matrix.job.flagname }}="${{ matrix.job.rustcflags }}"
+        echo $CARGO_TARGET_UNKNOWN_LINUX_MUSL_RUSTFLAGS
 
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable

@@ -17,9 +17,10 @@ pre-build = ["export DEBIAN_FRONTEND=noninteractive && dpkg --add-architecture $
 [target.x86_64-unknown-linux-musl]
 pre-build = [
   """
+    echo $CARGO_TARGET_UNKNOWN_LINUX_MUSL_RUSTFLAGS &&\
     export DEBIAN_FRONTEND=noninteractive &&\
     apt update &&\
-    apt-get install -y libvips-dev non-existing
+    apt-get install -y libvips-dev
   """
 ]
 # pre-build = [
