@@ -26,7 +26,7 @@ jobs:
         nif: ["2.16"]
         job:
           # - { target: arm-unknown-linux-gnueabihf , os: ubuntu-20.04 , use-cross: true }
-          - { target: aarch64-unknown-linux-gnu   , os: ubuntu-22.04 , use-cross: true, , rustcflags: "-C target-feature=-crt-static", flagname: "CARGO_TARGET_UNKNOWN_LINUX_MUSL_RUSTFLAGS" }
+          - { target: aarch64-unknown-linux-gnu   , os: ubuntu-22.04 , use-cross: true, rustcflags: "-C target-feature=-crt-static", flagname: "CARGO_TARGET_UNKNOWN_LINUX_MUSL_RUSTFLAGS" }
           # - { target: aarch64-apple-darwin        , os: macos-11      }
           # - { target: x86_64-apple-darwin         , os: macos-11      }
           # - { target: x86_64-unknown-linux-gnu    , os: ubuntu-20.04  }
