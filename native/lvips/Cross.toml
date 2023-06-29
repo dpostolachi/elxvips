@@ -18,7 +18,7 @@ pre-build = ["export DEBIAN_FRONTEND=noninteractive && dpkg --add-architecture $
 image = "amd64/alpine:3.18"
 pre-build = [
   """
-    apk --no-cache add vips vips-dev clang clang-dev libgcc build-base libc6-compat libwebp-dev rust cargo &&\
+    apk --no-cache add vips vips-dev clang clang-dev libgcc build-base libc6-compat libwebp-dev &&\
     export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUSTFLAGS="-C target-feature=-crt-static" &&\
     export RUST_BACKTRACE=1
   """
