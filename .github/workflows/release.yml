@@ -57,8 +57,8 @@ jobs:
     - name: Install dependencies
       shell: bash
       run: |
-        brew && brew install vips || echo 1
-        apt && apt install libvips-dev || echo 1
+        brew install vips || echo 1
+        install libvips-dev || echo 1
 
     - name: Build the project
       id: build-crate
