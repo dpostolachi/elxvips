@@ -56,7 +56,7 @@ jobs:
 
     - name: Install dependencies
       shell: bash
-      if: inputs.use-cross == 'true'
+      if: inputs.use-cross != 'true'
       run: |
         brew install vips || echo 1
         sudo apt-get install libvips-dev || echo 1
