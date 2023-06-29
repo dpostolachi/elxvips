@@ -16,6 +16,7 @@ pre-build = ["export DEBIAN_FRONTEND=noninteractive && dpkg --add-architecture $
 
 [target.x86_64-unknown-linux-musl]
 image = "amd64/alpine:3.18"
+toolchain = "stable-x86_64-unknown-linux-musl"
 pre-build = [
   """
     apk --no-cache add vips vips-dev clang clang-dev libgcc build-base libc6-compat libwebp-dev &&\
