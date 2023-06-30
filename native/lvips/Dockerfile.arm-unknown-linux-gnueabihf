@@ -22,4 +22,5 @@ WORKDIR /app
 COPY . .
 
 # build for release
+CMD cargo build
 CMD cargo build --release --target arm-unknown-linux-gnueabihf
