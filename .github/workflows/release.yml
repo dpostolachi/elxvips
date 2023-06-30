@@ -57,7 +57,7 @@ jobs:
       id: build-crate
       uses: dpostolachi/rustler-precompiled-action@main
       with:
-        project-name: elxvips
+        project-name: lvips
         cross-version: "v0.2.5"
         project-version: ${{ steps.extract-version.outputs.PROJECT_VERSION }}
         target: ${{ matrix.job.target }}
