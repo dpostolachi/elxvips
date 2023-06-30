@@ -53,7 +53,7 @@ jobs:
 
     - name: Install dependencies
       shell: bash
-      if: ${{ matrix.job.docker-image }} == ''
+      if: matrix.job.docker-image == ''
       run: |
         echo ">>>${{ matrix.job.docker-image }}"
         echo "Install dependencies"
