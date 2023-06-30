@@ -1,0 +1,25 @@
+from arm32v7/ubuntu:20.04
+
+# disable interactive functions
+ENV DEBIAN_FRONTEND=noninteractive
+
+# install add dependencies
+RUN apt-get update
+RUN apt-get install -y build-essential libvips-dev libclang-dev elixir
+
+# install rustup
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+
+# add cargo to path
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+RUN rustup target add arm-unknown-linux-gnueabihf
+
+# set working directory
+WORKDIR /app
+
+# copy the source tree
+COPY . .
+
+# build for release
+RUN cargo build --release --target arm-unknown-linux-gnueabihf
