@@ -55,6 +55,7 @@ jobs:
       shell: bash
       if: ${{ matrix.job.docker-image }} == ''
       run: |
+        echo ">>>${{ matrix.job.docker-image }}"
         echo "Install dependencies"
       # brew install vips || echo 1
       # sudo apt-get install libvips-dev || echo 1
