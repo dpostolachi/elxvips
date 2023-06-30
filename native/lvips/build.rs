@@ -18,7 +18,7 @@ fn main() {
     // should return something like: -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include ...
     let pkg_config_out = Command::new("sh")
         .arg("-c")
-        .arg("pkg-config --cflags --libs vips")
+        .arg("pkg-config --cflags --libs vips glib-2.0")
         .output()
         .unwrap()
         .stdout;
