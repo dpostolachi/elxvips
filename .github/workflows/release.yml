@@ -25,12 +25,12 @@ jobs:
       matrix:
         nif: ["2.16", "2.15"]
         job:
-          - { target: arm-unknown-linux-gnueabihf,      os: self-hosted,      use-cross: false,           docker-image: 'Dockerfile.arm-unknown-linux-gnueabihf' }
-          - { target: aarch64-unknown-linux-gnu,        os: self-hosted,      use-cross: false,           docker-image: 'Dockerfile.aarch64-unknown-linux-gnu' }
+          # - { target: arm-unknown-linux-gnueabihf,      os: self-hosted,      use-cross: false,           docker-image: 'Dockerfile.arm-unknown-linux-gnueabihf' }
+          # - { target: aarch64-unknown-linux-gnu,        os: self-hosted,      use-cross: false,           docker-image: 'Dockerfile.aarch64-unknown-linux-gnu' }
           - { target: x86_64-apple-darwin,              os: macos-11,         use-cross: false }
-          - { target: aarch64-apple-darwin,             os: macos-11,         use-cross: false }
-          - { target: x86_64-unknown-linux-gnu,         os: ubuntu-20.04,     use-cross: false }
-          - { target: x86_64-unknown-linux-musl,        os: ubuntu-22.04,     use-cross: false }
+          # - { target: aarch64-apple-darwin,             os: macos-11,         use-cross: false }
+          # - { target: x86_64-unknown-linux-gnu,         os: ubuntu-20.04,     use-cross: false }
+          # - { target: x86_64-unknown-linux-musl,        os: ubuntu-22.04,     use-cross: false }
 
     env:
       RUSTLER_NIF_VERSION: ${{ matrix.nif }}
@@ -43,7 +43,6 @@ jobs:
       run: |
         # Get the project version from mix.exs
         echo "PROJECT_VERSION=$(sed -n 's/^  @version "\(.*\)"/\1/p' mix.exs | head -n1)" >> $GITHUB_ENV
-        echo $CARGO_TARGET_UNKNOWN_LINUX_MUSL_RUSTFLAGS
 
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
