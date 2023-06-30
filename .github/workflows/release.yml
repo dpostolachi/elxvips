@@ -25,13 +25,10 @@ jobs:
       matrix:
         nif: ["2.16"]
         job:
-          # Arm
           - { target: arm-unknown-linux-gnueabihf,      os: self-hosted,      use-cross: false,           docker-image: "Dockerfile.arm-unknown-linux-gnueabihf" }
           - { target: aarch64-unknown-linux-gnu,        os: self-hosted,      use-cross: false,           docker-image: "Dockerfile.aarch64-unknown-linux-gnu" }
-          # MacOS
           - { target: target: x86_64-apple-darwin,      os: macos-11,         use-cross: false }
           - { target: target: aarch64-apple-darwin,     os: macos-11,         use-cross: false }
-          # Linux x64
           - { target: x86_64-unknown-linux-gnu,         os: ubuntu-20.04,     use-cross: false }
           - { target: x86_64-unknown-linux-musl,        os: ubuntu-22.04,     use-cross: false }
 
