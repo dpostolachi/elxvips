@@ -22,4 +22,4 @@ WORKDIR /app
 COPY . .
 
 # build for release
-RUN cargo build --release --target aarch64-unknown-linux-gnu
+CMD cargo build --release --target aarch64-unknown-linux-gnu
