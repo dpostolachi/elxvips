@@ -69,7 +69,7 @@ jobs:
         nif-version: ${{ matrix.nif }}
         use-cross: matrix.job.use-cross
         project-dir: "native/lvips"
-        docker-image: matrix.job.docker-image
+        docker-image: ${{ matrix.job.docker-image }}
 
     - name: Artifact upload
       uses: actions/upload-artifact@v3
