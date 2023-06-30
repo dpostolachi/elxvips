@@ -51,35 +51,36 @@ jobs:
         toolchain: stable
         target: ${{ matrix.job.target }}
 
-    # - name: Install dependencies
-    #   shell: bash
-    #   if: ${{ matrix.job.docker-image }} == ''
-    #   run: |
-    #     brew install vips || echo 1
-    #     sudo apt-get install libvips-dev || echo 1
+    - name: Install dependencies
+      shell: bash
+      if: ${{ matrix.job.docker-image }} == ''
+      run: |
+        echo "Install dependencies"
+      # brew install vips || echo 1
+      # sudo apt-get install libvips-dev || echo 1
 
-    - name: Build the project
-      id: build-crate
-      uses: dpostolachi/rustler-precompiled-action@main
-      with:
-        project-name: lvips
-        cross-version: "v0.2.5"
-        project-version: ${{ env.PROJECT_VERSION }}
-        target: ${{ matrix.job.target }}
-        nif-version: ${{ matrix.nif }}
-        use-cross: matrix.job.use-cross
-        project-dir: "native/lvips"
-        docker-image: ${{ matrix.job.docker-image }}
+    # - name: Build the project
+    #   id: build-crate
+    #   uses: dpostolachi/rustler-precompiled-action@main
+    #   with:
+    #     project-name: lvips
+    #     cross-version: "v0.2.5"
+    #     project-version: ${{ env.PROJECT_VERSION }}
+    #     target: ${{ matrix.job.target }}
+    #     nif-version: ${{ matrix.nif }}
+    #     use-cross: matrix.job.use-cross
+    #     project-dir: "native/lvips"
+    #     docker-image: ${{ matrix.job.docker-image }}
 
-    - name: Artifact upload
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ steps.build-crate.outputs.file-name }}
-        path: ${{ steps.build-crate.outputs.file-path }}
+    # - name: Artifact upload
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: ${{ steps.build-crate.outputs.file-name }}
+    #     path: ${{ steps.build-crate.outputs.file-path }}
 
-    - name: Publish archives and packages
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          ${{ steps.build-crate.outputs.file-path }}
-      if: startsWith(github.ref, 'refs/tags/')
+    # - name: Publish archives and packages
+    #   uses: softprops/action-gh-release@v1
+    #   with:
+    #     files: |
+    #       ${{ steps.build-crate.outputs.file-path }}
+    #   if: startsWith(github.ref, 'refs/tags/')
