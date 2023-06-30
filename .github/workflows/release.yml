@@ -40,9 +40,10 @@ jobs:
 
     - name: Extract project version
       shell: bash
+      id: extract-version
       run: |
         # Get the project version from mix.exs
-        echo "PROJECT_VERSION=$(sed -n 's/^  @version "\(.*\)"/\1/p' mix.exs | head -n1)" >> $GITHUB_ENV
+        echo "PROJECT_VERSION=$(sed -n 's/^  @version "\(.*\)"/\1/p' mix.exs | head -n1)" >> $GITHUB_OUTPUT
 
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
@@ -63,7 +64,7 @@ jobs:
       with:
         project-name: lvips
         cross-version: "v0.2.5"
-        project-version: ${{ env.PROJECT_VERSION }}
+        project-version: ${{ steps.vars.outputs.PROJECT_VERSION }}
         target: ${{ matrix.job.target }}
         nif-version: ${{ matrix.nif }}
         use-cross: matrix.job.use-cross
