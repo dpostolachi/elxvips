@@ -405,7 +405,7 @@ fn probe() -> Atom {
     ok()
 }
 
-rustler::init!("Elixir.Elxvips", [
+rustler::init!("Elixir.Elxvips.Native", [
         vips_process_file_to_file,
         vips_process_file_to_bytes,
         
