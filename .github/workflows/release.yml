@@ -59,7 +59,7 @@ jobs:
       with:
         project-name: lvips
         cross-version: "v0.2.5"
-        project-version: ${{ steps.vars.outputs.PROJECT_VERSION }}
+        project-version: ${{ steps.extract-version.outputs.PROJECT_VERSION }}
         target: ${{ matrix.job.target }}
         nif-version: ${{ matrix.nif }}
         use-cross: matrix.job.use-cross
