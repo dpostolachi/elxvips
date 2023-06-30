@@ -49,17 +49,6 @@ defmodule Elxvips do
   alias Elxvips.ImageBytes, as: ImageBytes
   alias Elxvips.SaveOptions, as: SaveOptions
 
-  # NIFs
-  # defp vips_set_concurrency(_a), do: :erlang.nif_error(:nif_not_loaded)
-  # defp vips_get_image_sizes(_a), do: :erlang.nif_error(:nif_not_loaded) # returns {:ok, { width, height } }
-  # defp vips_get_image_bytes_sizes(_a), do: :erlang.nif_error(:nif_not_loaded) # same but works with bytes
-  # defp vips_process_file_to_file(_a), do: :erlang.nif_error(:nif_not_loaded) # applies processing from %ImageFile{}
-  # defp vips_process_file_to_bytes(_a), do: :erlang.nif_error(:nif_not_loaded) # applies processing from %ImageBytes{} created from image path
-  # defp vips_process_bytes_to_bytes(_a), do: :erlang.nif_error(:nif_not_loaded) # applies processing from %ImageBytes{} created from image bytes
-  # defp vips_process_bytes_to_file(_a), do: :erlang.nif_error(:nif_not_loaded) # applies processing from %ImageBytes{} created from image bytes
-  # defp vips_get_image_file_format(_a), do: :erlang.nif_error(:nif_not_loaded) # applies processing from %ImageBytes{} created from image bytes
-  # defp vips_get_image_bytes_format(_a), do: :erlang.nif_error(:nif_not_loaded) # applies processing from %ImageBytes{} created from image bytes
-
   # creating new image from an existing image path
   defp process_to_file( image_file = %ImageFile{}, path ) when is_binary( path ) do
     image_file = %ImageFile{ image_file |
@@ -353,7 +342,7 @@ defmodule Elxvips do
   def to_file( { :ok, image }, path ), do: to_file( image, path )
 
   def set_concurrency( concurrency ) when is_integer( concurrency ) do
-    Elxvips.Native.vips_set_concurrency( concurrency )
+    Elxvips.Native.set_concurrency( concurrency )
   end
 
   @doc """
