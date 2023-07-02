@@ -7,7 +7,7 @@ edition = "2018"
 [lib]
 name = "lvips"
 path = "src/lib.rs"
-crate-type = ["staticlib"]
+crate-type = ["cdylib"]
 
 [dependencies]
 rustler = "0.29.1"
