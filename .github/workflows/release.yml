@@ -68,6 +68,7 @@ jobs:
       run: |
         sudo mv /usr/local/homebrew  /opt/homebrew
         export PATH=/opt/homebrew/bin:$PATH
+        pkg-config --cflags --libs vips glib-2.0
 
 
     # - name: Install dependencies
