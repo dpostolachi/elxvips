@@ -8,8 +8,7 @@ defmodule Elxvips.Native do
 		mode: :release,
 	  base_url:
 		"#{ source_url }/releases/download/v#{version}",
-	  # force_build: System.get_env("ELXVIPS_BUILD") in ["1", "true"],
-    force_build: true,
+	  force_build: System.get_env("ELXVIPS_BUILD") in ["1", "true"],
 	  version: version
 
 
