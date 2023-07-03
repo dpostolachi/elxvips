@@ -70,7 +70,7 @@ jobs:
         export PATH=/opt/homebrew/bin:$PATH
         export PKG_CONFIG_PATH=/opt/homebrew/lib/pkgconfig
         pkg-config --cflags --libs vips glib-2.0
-
+        sudo sed -i 's/user\/local\/homebrew/opt\/homebrew/g' /opt/homebrew/lib/pkgconfig/*
 
     # - name: Install dependencies
     #   shell: bash
