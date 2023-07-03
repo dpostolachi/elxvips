@@ -76,7 +76,7 @@ fn main() {
         .allowlist_function( "vips_resize" )
         .allowlist_function( "vips_image_get_as_string" )
         .allowlist_function( "g_object_unref" )
-        .allowlist_function( "g_free()" )
+        .allowlist_function( "g_free" )
         .allowlist_var( "VipsInterpretation_VIPS_INTERPRETATION_XYZ" )
         .allowlist_type( "_VipsImage" )
         .generate()
