@@ -47,20 +47,6 @@ jobs:
         toolchain: stable
         target: ${{ matrix.job.target }}
 
-    # Since arm Mac use /opt/homebrew (M1) instead of /usr/local (intel), for M1 we need to set up the path to /opt/homebrew
-    - name: Setup arm MacOS brew paths
-      shell: bash
-      if: contains( matrix.job.target, 'aarch64' ) && contains( matrix.job.target, 'apple-darwin')
-      run: |
-        cd ~
-        brew bundle dump
-        cd /opt
-        sudo git clone https://github.com/Homebrew/brew homebrew
-        sudo chown -R $(whoami) homebrew
-        export PATH=/opt/homebrew/bin:$PATH
-        brew bundle install --file ~/Brewfile
-
-
     - name: Install MacOS deps
       shell: bash
       if: contains( matrix.job.target, 'apple-darwin')
@@ -74,6 +60,14 @@ jobs:
       run: |
         sudo apt-get install libvips-dev || echo 1
         pkg-config --cflags --libs vips glib-2.0
+
+    # Since arm Mac use /opt/homebrew (M1) instead of /usr/local (intel), for M1 we need to set up the path to /opt/homebrew
+    - name: Setup arm MacOS brew paths
+      shell: bash
+      if: contains( matrix.job.target, 'aarch64' ) && contains( matrix.job.target, 'apple-darwin')
+      run: |
+        sudo mv /usr/local/homebrew  /opt/homebrew
+        export PATH=/opt/homebrew/bin:$PATH
 
 
     # - name: Install dependencies
