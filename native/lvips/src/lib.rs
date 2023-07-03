@@ -42,6 +42,8 @@ struct ImageFile {
     pub path: String,
     pub resize: ResizeOptions,
     pub save: SaveOptions,
+    pub pdf: bool,
+    pub page: i32,
 }
 
 #[derive(NifStruct, Debug)]
@@ -50,6 +52,8 @@ struct ImageBytes {
     pub bytes: Vec<u8>,
     pub resize: ResizeOptions,
     pub save: SaveOptions,
+    pub pdf: bool,
+    pub page: i32,
 }
 
 static SMART_CROP_OPTS: SmartcropOptions = SmartcropOptions {
@@ -64,7 +68,7 @@ fn format_to_atom( format: VipsFormat ) -> Atom {
     }
 }
 
-fn image_into_bytes<'a>(image: VipsImage, save_options: SaveOptions) -> Result<Vec<u8>, String> {
+fn image_into_bytes<'a>(image: VipsImage, save_options: &SaveOptions) -> Result<Vec<u8>, String> {
 
     let vips_format = match save_options.format {
         format if format == atoms::jpg() => VipsFormat::JPEG,
@@ -321,9 +325,23 @@ fn save_image( image: &VipsImage, save_options: &SaveOptions ) -> Result<(), Str
     }
 }
 
+fn load_from_file( image_input: &ImageFile ) -> Result<VipsImage, String> {
+    match &image_input.pdf {
+        true => VipsImage::from_pdf_file( &image_input.path, &image_input.page ),
+        false => VipsImage::from_file( &image_input.path )
+    }
+}
+
+fn load_from_buffer( image_input: &ImageBytes ) -> Result<VipsImage, String> {
+    match &image_input.pdf {
+        true => VipsImage::from_pdf_buffer( &image_input.bytes, &image_input.page ),
+        false => VipsImage::from_buffer( &image_input.bytes )
+    }
+}
+
 #[rustler::nif]
 fn vips_process_file_to_file(image_input: ImageFile) -> NifResult<Atom> {
-    let result = match VipsImage::from_file( &image_input.path ) {
+    let result = match load_from_file( &image_input ) {
         Ok( image ) => {
             match resize_image( image, &image_input.resize ) {
                 Ok( image ) => save_image( &image, &image_input.save ),
@@ -341,13 +359,10 @@ fn vips_process_file_to_file(image_input: ImageFile) -> NifResult<Atom> {
 
 #[rustler::nif]
 fn vips_process_file_to_bytes<'a>(env: Env<'a>, image_input: ImageFile) -> Result<Term<'a>, Error> {
-    let save_options = image_input.save;
-    let resize_options = image_input.resize;
-    let path = image_input.path;
-    let result = match VipsImage::from_file( &path ) {
+    let result = match load_from_file( &image_input ) {
         Ok( image ) => {
-            match resize_image( image, &resize_options ) {
-                Ok( image ) => image_into_bytes( image, save_options ),
+            match resize_image( image, &image_input.resize ) {
+                Ok( image ) => image_into_bytes( image, &image_input.save ),
                 Err( err ) => Err( err )
             }
         },
@@ -362,12 +377,10 @@ fn vips_process_file_to_bytes<'a>(env: Env<'a>, image_input: ImageFile) -> Resul
 
 #[rustler::nif]
 fn vips_process_bytes_to_bytes<'a>(env: Env<'a>, image_input: ImageBytes) -> Result<Term<'a>, Error> {
-    let resize_options = image_input.resize;
-    let save_options = image_input.save;
-    let result = match VipsImage::from_buffer( &image_input.bytes ) {
+    let result = match load_from_buffer( &image_input ) {
         Ok( image ) => {
-            match resize_image( image, &resize_options ) {
-                Ok( image ) => image_into_bytes( image, save_options ),
+            match resize_image( image, &image_input.resize ) {
+                Ok( image ) => image_into_bytes( image, &image_input.save ),
                 Err( err ) => Err( err )
             }
         },
@@ -382,12 +395,10 @@ fn vips_process_bytes_to_bytes<'a>(env: Env<'a>, image_input: ImageBytes) -> Res
 
 #[rustler::nif]
 fn vips_process_bytes_to_file<'a>(env: Env<'a>, image_input: ImageBytes) -> Result<Term<'a>, Error> {
-    let resize_options = image_input.resize;
-    let save_options = image_input.save;
-    let result = match VipsImage::from_buffer( &image_input.bytes ) {
+    let result = match load_from_buffer( &image_input ) {
         Ok( image ) => {
-            match resize_image( image, &resize_options ) {
-                Ok( image ) => save_image( &image, &save_options ),
+            match resize_image( image, &image_input.resize ) {
+                Ok( image ) => save_image( &image, &image_input.save ),
                 Err( err ) => Err( err )
             }
         },

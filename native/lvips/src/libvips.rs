@@ -94,6 +94,52 @@ impl VipsImage {
         }
     }
 
+    pub fn from_pdf_file( path: &str, page: &i32 ) -> Result<VipsImage, String> {
+        let filename = c_string( path ).unwrap();
+        let params = globals::get_params().unwrap();
+
+        unsafe {
+
+            let mut output: *mut bindings::VipsImage = null();
+
+            match  bindings::vips_pdfload(
+                filename.as_ptr(),
+                &mut output,
+                params.page.as_ptr(),         page.to_owned(),
+                utils::NULL
+            ) {
+                0 => Ok( VipsImage{
+                    image: output,
+                } ),
+                _ => Err( error_buffer() )
+            }
+
+        }
+    }
+
+    pub fn from_pdf_buffer( buffer: &[u8], page: &i32 ) -> Result<VipsImage, String> {
+        let params = globals::get_params().unwrap();
+        let options = c_string("").unwrap();
+
+        unsafe {
+            let image = bindings::vips_image_new_from_buffer(
+                buffer.as_ptr() as *const c_void,
+                buffer.len() as usize,
+                options.as_ptr(),
+                params.page.as_ptr(),         page.to_owned(),
+                utils::NULL
+            );
+
+            if image.is_null() {
+                Err( error_buffer() )
+            } else {
+                Ok( VipsImage{
+                    image: image,
+                } )
+            }
+        }
+    }
+
     pub fn from_buffer( buffer: &[u8] ) -> Result<VipsImage, String> {
         let options = c_string("").unwrap();
         unsafe {

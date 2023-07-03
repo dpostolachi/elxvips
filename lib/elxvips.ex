@@ -25,7 +25,9 @@ defmodule Elxvips.ImageFile do
       :height => 0,
       :resize_type => :auto,
     },
-    save: %Elxvips.SaveOptions{}
+    save: %Elxvips.SaveOptions{},
+    pdf: false,
+    page: 0,
   ]
 end
 
@@ -38,6 +40,8 @@ defmodule Elxvips.ImageBytes do
       :resize_type => :auto,
     },
     save: %Elxvips.SaveOptions{},
+    pdf: false,
+    page: 0,
   ]
 end
 
@@ -289,6 +293,29 @@ defmodule Elxvips do
   end
 
   @doc """
+  Will create an %ImageFile{} struct from a pdf path. This struct will be used for further processing.
+  Takes an optional page number, starting from 0. Defaults to 0 (first page).
+
+  ## Examples
+      iex> import Elxvips
+      iex>
+      iex> from_pdf( "/path/input.pdf", 0 )
+      %ImageFile{}
+
+  """
+
+  def from_pdf( path, opts \\ [ page: 0 ] ) when is_binary( path ) do
+    page = Keyword.get( opts, :page, 0 )
+
+    { :ok, %ImageFile{
+      :path => path,
+      :pdf => true,
+      :page => page,
+    } }
+    |> jpg()
+  end
+
+  @doc """
   Will create an %ImageByte{} struct from bitstring or byte list. This struct will be used for further processing.
 
   ## Examples
@@ -309,6 +336,41 @@ defmodule Elxvips do
     { :ok, %ImageBytes{
       :bytes => :erlang.binary_to_list( bytes ),
     } }
+  end
+
+  @doc """
+  Will create an %ImageByte{} struct from pdf bitstring or byte list. This struct will be used for further processing.
+  Takes an optional page number, starting from 0. Defaults to 0 (first page).
+
+  ## Examples
+      iex> import Elxvips
+      iex>
+      iex> file = File.open!( "/path/input.png" )
+      iex> bytes = IO.binread( file, :all )
+      iex> from_pdf_bytes( bytes, page: 0 )
+      %ImageBytes{}
+
+  """
+  def from_pdf_bytes( bytes ), do: from_pdf_bytes( bytes, [] )
+  def from_pdf_bytes( bytes, opts ) when is_list( bytes ) do
+    page = Keyword.get( opts, :page, 0 )
+
+    { :ok, %ImageBytes{
+      :bytes => bytes,
+      :pdf => true,
+      :page => page,
+    } }
+    |> jpg()
+  end
+  def from_pdf_bytes( bytes, opts ) when is_bitstring( bytes ) do
+    page = Keyword.get( opts, :page, 0 )
+
+    { :ok, %ImageBytes{
+      :bytes => :erlang.binary_to_list( bytes ),
+      :pdf => true,
+      :page => page,
+    } }
+    |> jpg()
   end
 
   @doc """
