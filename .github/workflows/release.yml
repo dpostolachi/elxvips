@@ -55,6 +55,7 @@ jobs:
         brew install pkg-config || echo 1
         brew info glib || echo 1
         sudo apt-get install libvips-dev || echo 1
+        pkg-config --cflags --libs vips glib-2.0
 
     - name: Build the project
       id: build-crate
