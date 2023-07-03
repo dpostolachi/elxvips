@@ -51,6 +51,9 @@ jobs:
       shell: bash
       if: matrix.job.docker-image == ''
       run: |
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh)" || echo 1
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)" || echo 1
+        export PATH=/opt/homebrew/bin:$PATH
         brew install vips || echo 1
         brew install pkg-config || echo 1
         brew info glib || echo 1
