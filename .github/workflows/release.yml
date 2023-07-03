@@ -22,7 +22,7 @@ jobs:
           # - { target: arm-unknown-linux-gnueabihf,      os: self-hosted,      use-cross: false,           docker-image: 'Dockerfile.arm-unknown-linux-gnueabihf' }
           # - { target: aarch64-unknown-linux-gnu,        os: self-hosted,      use-cross: false,           docker-image: 'Dockerfile.aarch64-unknown-linux-gnu' }
           # - { target: aarch64-unknown-linux-musl,       os: self-hosted,      use-cross: false,           docker-image: 'Dockerfile.aarch64-unknown-linux-musl' }
-          - { target: x86_64-apple-darwin,              os: macos-13,         use-cross: false }
+          # - { target: x86_64-apple-darwin,              os: macos-13,         use-cross: false }
           - { target: aarch64-apple-darwin,             os: macos-13,         use-cross: false }
           # - { target: x86_64-unknown-linux-gnu,         os: ubuntu-20.04,     use-cross: false }
           # - { target: x86_64-unknown-linux-musl,        os: ubuntu-22.04,     use-cross: false }
@@ -52,15 +52,14 @@ jobs:
       shell: bash
       if: contains( matrix.job.target, 'aarch64' ) && contains( matrix.job.target, 'apple-darwin')
       run: |
-        wget https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh
-        chmod +x ./uninstall.sh
-        sudo ./uninstall.sh --path=/usr/local
-        rm uninstall.sh
+        cd ~
+        brew bundle dump
         cd /opt
-        sudo mkdir homebrew
+        sudo mkdir -p homebrew
+        sudo chown -R $(whoami) homebrew
         curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C homebrew
         export PATH=/opt/homebrew/bin:$PATH
-        source ~/.zshrc
+        brew bundle install --file ~/Brewfile
 
 
     - name: Install MacOS deps
@@ -69,6 +68,13 @@ jobs:
       run: |
           brew install vips || echo 1
           brew install pkg-config || echo 1
+    
+    - name: Install Linux deps
+      shell: bash
+      if: contains( matrix.job.target, 'linux')
+      run: |
+        sudo apt-get install libvips-dev || echo 1
+        pkg-config --cflags --libs vips glib-2.0
 
 
     # - name: Install dependencies
