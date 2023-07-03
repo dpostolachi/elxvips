@@ -47,41 +47,65 @@ jobs:
         toolchain: stable
         target: ${{ matrix.job.target }}
 
-    - name: Install dependencies
-      shell: bash
-      if: matrix.job.docker-image == ''
-      run: |
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh)" || echo 1
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)" || echo 1
-        export PATH=/opt/homebrew/bin:$PATH
+    # Since arm Mac use /opt/homebrew (M1) instead of /usr/local (intel), for M1 we need to set up the path to /opt/homebrew
+    - name: Setup arm MacOS brew paths
+    shell: bash
+    if: contains( matrix.job.target, 'aarch64' ) && contains( matrix.job.target, 'apple-darwin')
+    run: |
+      wget https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh
+      chmod +x ./uninstall.sh
+      sudo ./uninstall.sh --path=/usr/local
+      rm uninstall.sh
+      cd /opt
+      sudo mkdir homebrew
+      curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C homebrew
+      export PATH=/opt/homebrew/bin:$PATH
+      source ~/.zshrc
+
+
+    - name: Install MacOS deps
+    shell: bash
+    if: contains( matrix.job.target, 'apple-darwin')
+    run: |
         brew install vips || echo 1
         brew install pkg-config || echo 1
-        brew info glib || echo 1
-        sudo apt-get install libvips-dev || echo 1
-        pkg-config --cflags --libs vips glib-2.0
 
-    - name: Build the project
-      id: build-crate
-      uses: dpostolachi/rustler-precompiled-action@main
-      with:
-        project-name: lvips
-        cross-version: "v0.2.5"
-        project-version: ${{ steps.extract-version.outputs.PROJECT_VERSION }}
-        target: ${{ matrix.job.target }}
-        nif-version: ${{ matrix.nif }}
-        use-cross: matrix.job.use-cross
-        project-dir: "native/lvips"
-        docker-image: ${{ matrix.job.docker-image }}
 
-    - name: Artifact upload
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ steps.build-crate.outputs.file-name }}
-        path: ${{ steps.build-crate.outputs.file-path }}
+    # - name: Install dependencies
+    #   shell: bash
+    #   if: matrix.job.docker-image == ''
+    #   run: |
+    #     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh)" || echo 1
+    #     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)" || echo 1
+    #     export PATH=/opt/homebrew/bin:$PATH
+    #     brew install vips || echo 1
+    #     brew install pkg-config || echo 1
+    #     brew info glib || echo 1
+    #     sudo apt-get install libvips-dev || echo 1
+    #     pkg-config --cflags --libs vips glib-2.0
 
-    - name: Publish archives and packages
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          ${{ steps.build-crate.outputs.file-path }}
-      if: startsWith(github.ref, 'refs/tags/')
+    # - name: Build the project
+    #   id: build-crate
+    #   uses: dpostolachi/rustler-precompiled-action@main
+    #   with:
+    #     project-name: lvips
+    #     cross-version: "v0.2.5"
+    #     project-version: ${{ steps.extract-version.outputs.PROJECT_VERSION }}
+    #     target: ${{ matrix.job.target }}
+    #     nif-version: ${{ matrix.nif }}
+    #     use-cross: matrix.job.use-cross
+    #     project-dir: "native/lvips"
+    #     docker-image: ${{ matrix.job.docker-image }}
+
+    # - name: Artifact upload
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: ${{ steps.build-crate.outputs.file-name }}
+    #     path: ${{ steps.build-crate.outputs.file-path }}
+
+    # - name: Publish archives and packages
+    #   uses: softprops/action-gh-release@v1
+    #   with:
+    #     files: |
+    #       ${{ steps.build-crate.outputs.file-path }}
+    #   if: startsWith(github.ref, 'refs/tags/')
