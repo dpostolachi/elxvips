@@ -55,9 +55,8 @@ jobs:
         cd ~
         brew bundle dump
         cd /opt
-        sudo mkdir -p homebrew
+        sudo git clone https://github.com/Homebrew/brew homebrew
         sudo chown -R $(whoami) homebrew
-        curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C homebrew
         export PATH=/opt/homebrew/bin:$PATH
         brew bundle install --file ~/Brewfile
 
