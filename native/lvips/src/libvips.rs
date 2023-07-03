@@ -94,12 +94,60 @@ impl VipsImage {
         }
     }
 
+    pub fn from_pdf_file( path: &str, page: &i32, n: &i32 ) -> Result<VipsImage, String> {
+        let filename = c_string( path ).unwrap();
+        let params = globals::get_params().unwrap();
+
+        unsafe {
+
+            let mut output: *mut bindings::VipsImage = null();
+
+            match  bindings::vips_pdfload(
+                filename.as_ptr(),
+                &mut output,
+                params.page.as_ptr(),         page.to_owned(),
+                params.n.as_ptr(),            n.to_owned(),
+                utils::NULL
+            ) {
+                0 => Ok( VipsImage{
+                    image: output,
+                } ),
+                _ => Err( error_buffer() )
+            }
+
+        }
+    }
+
+    pub fn from_pdf_buffer( buffer: &[u8], page: &i32, n: &i32 ) -> Result<VipsImage, String> {
+        let params = globals::get_params().unwrap();
+        let options = c_string("").unwrap();
+
+        unsafe {
+            let image = bindings::vips_image_new_from_buffer(
+                buffer.as_ptr() as *const c_void,
+                buffer.len() as usize,
+                options.as_ptr(),
+                params.page.as_ptr(),           page.to_owned(),
+                params.n.as_ptr(),              n.to_owned(),
+                utils::NULL
+            );
+
+            if image.is_null() {
+                Err( error_buffer() )
+            } else {
+                Ok( VipsImage{
+                    image: image,
+                } )
+            }
+        }
+    }
+
     pub fn from_buffer( buffer: &[u8] ) -> Result<VipsImage, String> {
         let options = c_string("").unwrap();
         unsafe {
             let image = bindings::vips_image_new_from_buffer(
                 buffer.as_ptr() as *const c_void,
-                buffer.len() as u64,
+                buffer.len() as usize,
                 options.as_ptr(),
                 utils::NULL
             );
@@ -285,7 +333,7 @@ impl VipsImage {
     }
 
     pub fn jpeg_buffer( &self ) -> Result<Vec<u8>, String> {
-        let mut buffer_buf_size: u64 = 0;
+        let mut buffer_buf_size: usize = 0;
         let mut buffer_out = null();
 
         unsafe {
@@ -302,7 +350,7 @@ impl VipsImage {
     }
 
     pub fn jpeg_buffer_opts( &self, options: &JpegSaveOptions ) -> Result<Vec<u8>, String> {
-        let mut buffer_buf_size: u64 = 0;
+        let mut buffer_buf_size: usize = 0;
         let mut buffer_out = null();
         let profile = c_string(&options.profile).unwrap();
         let params = globals::get_params().unwrap();
@@ -335,7 +383,7 @@ impl VipsImage {
     }
 
     pub fn png_buffer( &self ) -> Result<Vec<u8>, String> {
-        let mut buffer_buf_size: u64 = 0;
+        let mut buffer_buf_size: usize = 0;
         let mut buffer_out = null();
 
         unsafe {
@@ -352,7 +400,7 @@ impl VipsImage {
     }
 
     pub fn png_buffer_opts( &self, options: &PngSaveOptions ) -> Result<Vec<u8>, String> {
-        let mut buffer_buf_size: u64 = 0;
+        let mut buffer_buf_size: usize = 0;
         let mut buffer_out = null();
         let params = globals::get_params().unwrap();
         let profile = c_string(&options.profile).unwrap();
@@ -384,7 +432,7 @@ impl VipsImage {
     }
 
     pub fn webp_buffer( &self ) -> Result<Vec<u8>, String> {
-        let mut buffer_buf_size: u64 = 0;
+        let mut buffer_buf_size: usize = 0;
         let mut buffer_out = null();
 
         unsafe {
@@ -401,7 +449,7 @@ impl VipsImage {
     }
 
     pub fn webp_buffer_opts( &self, options: &WebPSaveOptions ) -> Result<Vec<u8>, String> {
-        let mut buffer_buf_size: u64 = 0;
+        let mut buffer_buf_size: usize = 0;
         let mut buffer_out = null();
         let params = globals::get_params().unwrap();
         let profile = c_string(&options.profile).unwrap();

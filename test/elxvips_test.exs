@@ -152,4 +152,29 @@ defmodule ElxvipsTest do
 
   end
 
+  test "pdf to png" do
+      format = from_pdf( "test/sample.pdf", page: 0, n: 2 )
+      |> resize( width: 500 )
+      |> png()
+      |> to_file( "test/pdf_output.png" )
+      |> get_image_format()
+
+      assert format == { :ok, :png }
+
+  end
+
+  test "from pdf bytes, autodetect format" do
+
+    file = File.open!( "test/sample.pdf", [ :read ] )
+    bytes = IO.binread( file, :all )
+
+    sizes = from_pdf_bytes( bytes, page: 0 )
+    |> resize( width: 100, height: 100 )
+    |> to_bytes()
+    |> get_image_sizes()
+
+    assert sizes == { :ok, [ 100, 100 ] }
+
+  end
+
 end

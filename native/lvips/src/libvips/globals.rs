@@ -25,6 +25,9 @@ pub struct GlobalsParams {
     pub interesting:            CString,
 
     pub vips_loader:            CString,
+
+    pub n:                      CString,
+    pub page:                      CString,
  
 }
 
@@ -53,6 +56,9 @@ impl Default for GlobalsParams {
             interesting:            c_string( "interesting" ).unwrap(),
 
             vips_loader:            c_string( "vips-loader" ).unwrap(),
+
+            n:                      c_string( "n" ).unwrap(),
+            page:                   c_string( "page" ).unwrap(),
         }
     }
 }
