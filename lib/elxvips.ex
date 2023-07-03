@@ -297,15 +297,14 @@ defmodule Elxvips do
   @doc """
   Will create an %ImageFile{} struct from a pdf path. This struct will be used for further processing.
   Accepts the following options:
-  * :page - page number to extract from pdf, default is 0
-  * :n - number of pages to extract from pdf, default is 1
+  * `:page` - page number to extract from pdf, default is 0
+  * `:n` - number of pages to extract from pdf, default is 1
 
   ## Examples
       iex> import Elxvips
       iex>
-      iex> from_pdf( "/path/input.pdf", 0 )
+      iex> from_pdf( "/path/input.pdf", page: 0, n: 2 )
       %ImageFile{}
-
   """
 
   def from_pdf( path, opts \\ [ page: 0 ] ) when is_binary( path ) do
@@ -347,15 +346,15 @@ defmodule Elxvips do
   @doc """
   Will create an %ImageByte{} struct from pdf bitstring or byte list. This struct will be used for further processing.
   Accepts the following options:
-  * :page - page number to extract from pdf, default is 0
-  * :n - number of pages to extract from pdf, default is 1
+  * `:page` - page number to extract from pdf, default is 0
+  * `:n` - number of pages to extract from pdf, default is 1
 
   ## Examples
       iex> import Elxvips
       iex>
-      iex> file = File.open!( "/path/input.png" )
+      iex> file = File.open!( "/path/input.pdf" )
       iex> bytes = IO.binread( file, :all )
-      iex> from_pdf_bytes( bytes, page: 0 )
+      iex> from_pdf_bytes( bytes, page: 0, n: 2 )
       %ImageBytes{}
 
   """
