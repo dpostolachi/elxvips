@@ -1,0 +1,16 @@
+%{
+  "liblvips-v0.1.3-nif-2.15-aarch64-apple-darwin.so.tar.gz" => "sha256:2e73b4e950385c39160823905bbdd9e59d610f29017dc29281e70126a7a342a6",
+  "liblvips-v0.1.3-nif-2.15-aarch64-unknown-linux-gnu.so.tar.gz" => "sha256:4075e0b04f90392436e5567af36884626f21e38a5baafee10a2c41e9ad43bca7",
+  "liblvips-v0.1.3-nif-2.15-aarch64-unknown-linux-musl.so.tar.gz" => "sha256:699ea0e2eccb8217345bb86cfa57b3955533beeb426637b89e9eae455d4fdc35",
+  "liblvips-v0.1.3-nif-2.15-arm-unknown-linux-gnueabihf.so.tar.gz" => "sha256:f9a5323e2009c1af8bf4c123d4644808dc1bb9023fefeadf1f11a98480a2597d",
+  "liblvips-v0.1.3-nif-2.15-x86_64-apple-darwin.so.tar.gz" => "sha256:b4a5e7d7c40298f012594bd597012dd09291602ea511709cdcb08df86b017b70",
+  "liblvips-v0.1.3-nif-2.15-x86_64-unknown-linux-gnu.so.tar.gz" => "sha256:3fe266b03134f6c431a6873a4f85dcb80bcd8f1802896bab164a79d1b4b42f42",
+  "liblvips-v0.1.3-nif-2.15-x86_64-unknown-linux-musl.so.tar.gz" => "sha256:6ea0d9750bb3227fe4a525adf7f098d11b11ba96bf5d4a432ef5609f6b9caae3",
+  "liblvips-v0.1.3-nif-2.16-aarch64-apple-darwin.so.tar.gz" => "sha256:a3400ec0d3e70e295987a8f3749f84c0c913a667aa7a1b62a54c3cd4af66a25a",
+  "liblvips-v0.1.3-nif-2.16-aarch64-unknown-linux-gnu.so.tar.gz" => "sha256:176555bd236daa5c86198aba1ee9ad0bce06bb519e8219fa043eff50e5a1c007",
+  "liblvips-v0.1.3-nif-2.16-aarch64-unknown-linux-musl.so.tar.gz" => "sha256:ab3338da127e3f2888f65cf75f16d55682878c41be9539bd70d9feff5df85869",
+  "liblvips-v0.1.3-nif-2.16-arm-unknown-linux-gnueabihf.so.tar.gz" => "sha256:ebdf935bc497b2a6226d01463a5ffed1dd0297dbfb77d6f94a5805875f6e1c27",
+  "liblvips-v0.1.3-nif-2.16-x86_64-apple-darwin.so.tar.gz" => "sha256:4c28e7ec20cc2d65f587f0c48bbf13e330ddc03a03d51c386deeaa621b540a3c",
+  "liblvips-v0.1.3-nif-2.16-x86_64-unknown-linux-gnu.so.tar.gz" => "sha256:f8c8b004a4922353b79337798ff008c16547612f0000dcf70f498f783db6192b",
+  "liblvips-v0.1.3-nif-2.16-x86_64-unknown-linux-musl.so.tar.gz" => "sha256:9c2f9b8f9786c10457b577256abc26e31d64c6e2934175a1b8956d58cea0c0dc",
+}

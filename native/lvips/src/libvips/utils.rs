@@ -15,8 +15,8 @@ pub fn c_string(string: &str) -> Result<CString, &str> {
     }
 }
 
-pub fn get_buffer(buf: *mut c_void, size: u64) -> Vec<u8> {
+pub fn get_buffer(buf: *mut c_void, size: usize) -> Vec<u8> {
     unsafe {
-        Vec::from_raw_parts(buf as *mut u8, size as usize, size as usize)
+        Vec::from_raw_parts(buf as *mut u8, size, size )
     }
 }

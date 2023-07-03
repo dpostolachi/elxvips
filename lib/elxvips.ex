@@ -25,7 +25,10 @@ defmodule Elxvips.ImageFile do
       :height => 0,
       :resize_type => :auto,
     },
-    save: %Elxvips.SaveOptions{}
+    save: %Elxvips.SaveOptions{},
+    pdf: false,
+    page: 0,
+    n: 1,
   ]
 end
 
@@ -38,6 +41,9 @@ defmodule Elxvips.ImageBytes do
       :resize_type => :auto,
     },
     save: %Elxvips.SaveOptions{},
+    pdf: false,
+    page: 0,
+    n: 1,
   ]
 end
 
@@ -45,28 +51,16 @@ defmodule Elxvips do
   @moduledoc """
   Documentation for `Elxvips`.
   """
-  use Rustler, otp_app: :elxvips, crate: "lvips"
   alias Elxvips.ImageFile, as: ImageFile
   alias Elxvips.ImageBytes, as: ImageBytes
   alias Elxvips.SaveOptions, as: SaveOptions
-
-  # NIFs
-  defp vips_set_concurrency(_a), do: :erlang.nif_error(:nif_not_loaded)
-  defp vips_get_image_sizes(_a), do: :erlang.nif_error(:nif_not_loaded) # returns {:ok, { width, height } }
-  defp vips_get_image_bytes_sizes(_a), do: :erlang.nif_error(:nif_not_loaded) # same but works with bytes
-  defp vips_process_file_to_file(_a), do: :erlang.nif_error(:nif_not_loaded) # applies processing from %ImageFile{}
-  defp vips_process_file_to_bytes(_a), do: :erlang.nif_error(:nif_not_loaded) # applies processing from %ImageBytes{} created from image path
-  defp vips_process_bytes_to_bytes(_a), do: :erlang.nif_error(:nif_not_loaded) # applies processing from %ImageBytes{} created from image bytes
-  defp vips_process_bytes_to_file(_a), do: :erlang.nif_error(:nif_not_loaded) # applies processing from %ImageBytes{} created from image bytes
-  defp vips_get_image_file_format(_a), do: :erlang.nif_error(:nif_not_loaded) # applies processing from %ImageBytes{} created from image bytes
-  defp vips_get_image_bytes_format(_a), do: :erlang.nif_error(:nif_not_loaded) # applies processing from %ImageBytes{} created from image bytes
 
   # creating new image from an existing image path
   defp process_to_file( image_file = %ImageFile{}, path ) when is_binary( path ) do
     image_file = %ImageFile{ image_file |
       :save => Kernel.struct( image_file.save, [ path: path ] )
     }
-    with :ok <- vips_process_file_to_file( image_file ) do
+    with :ok <- Elxvips.Native.vips_process_file_to_file( image_file ) do
       { :ok, %ImageFile{
         :path => path,
       } }
@@ -78,7 +72,7 @@ defmodule Elxvips do
     image_bytes = %ImageBytes{ image_bytes |
       :save => Kernel.struct( image_bytes.save, [ path: path ] )
     }
-    with :ok <- vips_process_bytes_to_file( image_bytes ) do
+    with :ok <- Elxvips.Native.vips_process_bytes_to_file( image_bytes ) do
       { :ok, %ImageFile{
         :path => path,
       } }
@@ -88,7 +82,7 @@ defmodule Elxvips do
   end
   # In case the we have a image path as image_bytes
   defp process_to_bytes( image_file = %ImageFile{ :path => path } ) when is_binary( path )  do
-    with { :ok, bytes } <- vips_process_file_to_bytes( image_file ) do
+    with { :ok, bytes } <- Elxvips.Native.vips_process_file_to_bytes( image_file ) do
       { :ok, %ImageBytes{
         :bytes => bytes,
       } }
@@ -98,7 +92,7 @@ defmodule Elxvips do
   end
   # In case we have raw bytes
   defp process_to_bytes( image_bytes = %ImageBytes{ :bytes => bytes } ) when is_list( bytes ) do
-    with { :ok, bytes } <- vips_process_bytes_to_bytes( image_bytes ) do
+    with { :ok, bytes } <- Elxvips.Native.vips_process_bytes_to_bytes( image_bytes ) do
       { :ok, %ImageBytes{
         :bytes => bytes,
       } }
@@ -301,6 +295,33 @@ defmodule Elxvips do
   end
 
   @doc """
+  Will create an %ImageFile{} struct from a pdf path. This struct will be used for further processing.
+  Accepts the following options:
+  * :page - page number to extract from pdf, default is 0
+  * :n - number of pages to extract from pdf, default is 1
+
+  ## Examples
+      iex> import Elxvips
+      iex>
+      iex> from_pdf( "/path/input.pdf", 0 )
+      %ImageFile{}
+
+  """
+
+  def from_pdf( path, opts \\ [ page: 0 ] ) when is_binary( path ) do
+    page = Keyword.get( opts, :page, 0 )
+    n = Keyword.get( opts, :n, 1 )
+
+    { :ok, %ImageFile{
+      :path => path,
+      :pdf => true,
+      :page => page,
+      :n => n,
+    } }
+    |> jpg()
+  end
+
+  @doc """
   Will create an %ImageByte{} struct from bitstring or byte list. This struct will be used for further processing.
 
   ## Examples
@@ -321,6 +342,47 @@ defmodule Elxvips do
     { :ok, %ImageBytes{
       :bytes => :erlang.binary_to_list( bytes ),
     } }
+  end
+
+  @doc """
+  Will create an %ImageByte{} struct from pdf bitstring or byte list. This struct will be used for further processing.
+  Accepts the following options:
+  * :page - page number to extract from pdf, default is 0
+  * :n - number of pages to extract from pdf, default is 1
+
+  ## Examples
+      iex> import Elxvips
+      iex>
+      iex> file = File.open!( "/path/input.png" )
+      iex> bytes = IO.binread( file, :all )
+      iex> from_pdf_bytes( bytes, page: 0 )
+      %ImageBytes{}
+
+  """
+  def from_pdf_bytes( bytes ), do: from_pdf_bytes( bytes, [] )
+  def from_pdf_bytes( bytes, opts ) when is_list( bytes ) do
+    page = Keyword.get( opts, :page, 0 )
+    n = Keyword.get( opts, :n, 1 )
+
+    { :ok, %ImageBytes{
+      :bytes => bytes,
+      :pdf => true,
+      :page => page,
+      :n => n
+    } }
+    |> jpg()
+  end
+  def from_pdf_bytes( bytes, opts ) when is_bitstring( bytes ) do
+    page = Keyword.get( opts, :page, 0 )
+    n = Keyword.get( opts, :n, 1 )
+
+    { :ok, %ImageBytes{
+      :bytes => :erlang.binary_to_list( bytes ),
+      :pdf => true,
+      :page => page,
+      :n => n
+    } }
+    |> jpg()
   end
 
   @doc """
@@ -354,7 +416,7 @@ defmodule Elxvips do
   def to_file( { :ok, image }, path ), do: to_file( image, path )
 
   def set_concurrency( concurrency ) when is_integer( concurrency ) do
-    vips_set_concurrency( concurrency )
+    Elxvips.Native.set_concurrency( concurrency )
   end
 
   @doc """
@@ -367,8 +429,8 @@ defmodule Elxvips do
       iex> |> get_image_sizes()
       {:ok, [640, 486]}
   """
-  def get_image_sizes( path ) when is_binary( path ), do: vips_get_image_sizes( path )
-  def get_image_sizes( bytes ) when is_list( bytes ), do: vips_get_image_bytes_sizes( bytes )
+  def get_image_sizes( path ) when is_binary( path ), do: Elxvips.Native.vips_get_image_sizes( path )
+  def get_image_sizes( bytes ) when is_list( bytes ), do: Elxvips.Native.vips_get_image_bytes_sizes( bytes )
 
   def get_image_sizes( %ImageFile{ :path => path } ), do: get_image_sizes( path )
   def get_image_sizes( {:ok, %ImageFile{ :path => path } } ), do: get_image_sizes( path )
@@ -386,8 +448,8 @@ defmodule Elxvips do
       iex> |> get_image_format()
       {:ok, :png}
   """
-  def get_image_format( path ) when is_binary( path ), do: vips_get_image_file_format( path )
-  def get_image_format( bytes ) when is_list( bytes ), do: vips_get_image_bytes_format( bytes )
+  def get_image_format( path ) when is_binary( path ), do: Elxvips.Native.vips_get_image_file_format( path )
+  def get_image_format( bytes ) when is_list( bytes ), do: Elxvips.Native.vips_get_image_bytes_format( bytes )
 
   def get_image_format( %ImageFile{ :path => path } ), do: get_image_format( path )
   def get_image_format( {:ok, %ImageFile{ :path => path } } ), do: get_image_format( path )

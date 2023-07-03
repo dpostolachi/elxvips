@@ -10,8 +10,8 @@ path = "src/lib.rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-rustler = "0.22.2"
+rustler = "0.29.1"
 num_cpus = "1.13.0"
 
 [build-dependencies]
-bindgen = "0.53.1"
+bindgen = "0.66.1"
