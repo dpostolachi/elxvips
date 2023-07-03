@@ -28,6 +28,7 @@ defmodule Elxvips.ImageFile do
     save: %Elxvips.SaveOptions{},
     pdf: false,
     page: 0,
+    n: 1,
   ]
 end
 
@@ -42,6 +43,7 @@ defmodule Elxvips.ImageBytes do
     save: %Elxvips.SaveOptions{},
     pdf: false,
     page: 0,
+    n: 1,
   ]
 end
 
@@ -294,7 +296,9 @@ defmodule Elxvips do
 
   @doc """
   Will create an %ImageFile{} struct from a pdf path. This struct will be used for further processing.
-  Takes an optional page number, starting from 0. Defaults to 0 (first page).
+  Accepts the following options:
+  * :page - page number to extract from pdf, default is 0
+  * :n - number of pages to extract from pdf, default is 1
 
   ## Examples
       iex> import Elxvips
@@ -306,11 +310,13 @@ defmodule Elxvips do
 
   def from_pdf( path, opts \\ [ page: 0 ] ) when is_binary( path ) do
     page = Keyword.get( opts, :page, 0 )
+    n = Keyword.get( opts, :n, 1 )
 
     { :ok, %ImageFile{
       :path => path,
       :pdf => true,
       :page => page,
+      :n => n,
     } }
     |> jpg()
   end
@@ -340,7 +346,9 @@ defmodule Elxvips do
 
   @doc """
   Will create an %ImageByte{} struct from pdf bitstring or byte list. This struct will be used for further processing.
-  Takes an optional page number, starting from 0. Defaults to 0 (first page).
+  Accepts the following options:
+  * :page - page number to extract from pdf, default is 0
+  * :n - number of pages to extract from pdf, default is 1
 
   ## Examples
       iex> import Elxvips
@@ -354,21 +362,25 @@ defmodule Elxvips do
   def from_pdf_bytes( bytes ), do: from_pdf_bytes( bytes, [] )
   def from_pdf_bytes( bytes, opts ) when is_list( bytes ) do
     page = Keyword.get( opts, :page, 0 )
+    n = Keyword.get( opts, :n, 1 )
 
     { :ok, %ImageBytes{
       :bytes => bytes,
       :pdf => true,
       :page => page,
+      :n => n
     } }
     |> jpg()
   end
   def from_pdf_bytes( bytes, opts ) when is_bitstring( bytes ) do
     page = Keyword.get( opts, :page, 0 )
+    n = Keyword.get( opts, :n, 1 )
 
     { :ok, %ImageBytes{
       :bytes => :erlang.binary_to_list( bytes ),
       :pdf => true,
       :page => page,
+      :n => n
     } }
     |> jpg()
   end

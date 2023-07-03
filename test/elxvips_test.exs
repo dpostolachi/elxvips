@@ -153,7 +153,7 @@ defmodule ElxvipsTest do
   end
 
   test "pdf to png" do
-      format = from_pdf( "test/sample.pdf", page: 1 )
+      format = from_pdf( "test/sample.pdf", page: 0, n: 2 )
       |> resize( width: 500 )
       |> png()
       |> to_file( "test/pdf_output.png" )

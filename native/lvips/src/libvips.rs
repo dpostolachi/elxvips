@@ -94,7 +94,7 @@ impl VipsImage {
         }
     }
 
-    pub fn from_pdf_file( path: &str, page: &i32 ) -> Result<VipsImage, String> {
+    pub fn from_pdf_file( path: &str, page: &i32, n: &i32 ) -> Result<VipsImage, String> {
         let filename = c_string( path ).unwrap();
         let params = globals::get_params().unwrap();
 
@@ -106,6 +106,7 @@ impl VipsImage {
                 filename.as_ptr(),
                 &mut output,
                 params.page.as_ptr(),         page.to_owned(),
+                params.n.as_ptr(),            n.to_owned(),
                 utils::NULL
             ) {
                 0 => Ok( VipsImage{
@@ -117,7 +118,7 @@ impl VipsImage {
         }
     }
 
-    pub fn from_pdf_buffer( buffer: &[u8], page: &i32 ) -> Result<VipsImage, String> {
+    pub fn from_pdf_buffer( buffer: &[u8], page: &i32, n: &i32 ) -> Result<VipsImage, String> {
         let params = globals::get_params().unwrap();
         let options = c_string("").unwrap();
 
@@ -126,7 +127,8 @@ impl VipsImage {
                 buffer.as_ptr() as *const c_void,
                 buffer.len() as usize,
                 options.as_ptr(),
-                params.page.as_ptr(),         page.to_owned(),
+                params.page.as_ptr(),           page.to_owned(),
+                params.n.as_ptr(),              n.to_owned(),
                 utils::NULL
             );
 

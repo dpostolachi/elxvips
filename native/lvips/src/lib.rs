@@ -44,6 +44,7 @@ struct ImageFile {
     pub save: SaveOptions,
     pub pdf: bool,
     pub page: i32,
+    pub n: i32,
 }
 
 #[derive(NifStruct, Debug)]
@@ -54,6 +55,7 @@ struct ImageBytes {
     pub save: SaveOptions,
     pub pdf: bool,
     pub page: i32,
+    pub n: i32,
 }
 
 static SMART_CROP_OPTS: SmartcropOptions = SmartcropOptions {
@@ -327,14 +329,14 @@ fn save_image( image: &VipsImage, save_options: &SaveOptions ) -> Result<(), Str
 
 fn load_from_file( image_input: &ImageFile ) -> Result<VipsImage, String> {
     match &image_input.pdf {
-        true => VipsImage::from_pdf_file( &image_input.path, &image_input.page ),
+        true => VipsImage::from_pdf_file( &image_input.path, &image_input.page, &image_input.n ),
         false => VipsImage::from_file( &image_input.path )
     }
 }
 
 fn load_from_buffer( image_input: &ImageBytes ) -> Result<VipsImage, String> {
     match &image_input.pdf {
-        true => VipsImage::from_pdf_buffer( &image_input.bytes, &image_input.page ),
+        true => VipsImage::from_pdf_buffer( &image_input.bytes, &image_input.page, &image_input.n ),
         false => VipsImage::from_buffer( &image_input.bytes )
     }
 }
