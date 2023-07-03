@@ -49,26 +49,26 @@ jobs:
 
     # Since arm Mac use /opt/homebrew (M1) instead of /usr/local (intel), for M1 we need to set up the path to /opt/homebrew
     - name: Setup arm MacOS brew paths
-    shell: bash
-    if: contains( matrix.job.target, 'aarch64' ) && contains( matrix.job.target, 'apple-darwin')
-    run: |
-      wget https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh
-      chmod +x ./uninstall.sh
-      sudo ./uninstall.sh --path=/usr/local
-      rm uninstall.sh
-      cd /opt
-      sudo mkdir homebrew
-      curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C homebrew
-      export PATH=/opt/homebrew/bin:$PATH
-      source ~/.zshrc
+      shell: bash
+      if: contains( matrix.job.target, 'aarch64' ) && contains( matrix.job.target, 'apple-darwin')
+      run: |
+        wget https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh
+        chmod +x ./uninstall.sh
+        sudo ./uninstall.sh --path=/usr/local
+        rm uninstall.sh
+        cd /opt
+        sudo mkdir homebrew
+        curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C homebrew
+        export PATH=/opt/homebrew/bin:$PATH
+        source ~/.zshrc
 
 
     - name: Install MacOS deps
-    shell: bash
-    if: contains( matrix.job.target, 'apple-darwin')
-    run: |
-        brew install vips || echo 1
-        brew install pkg-config || echo 1
+      shell: bash
+      if: contains( matrix.job.target, 'apple-darwin')
+      run: |
+          brew install vips || echo 1
+          brew install pkg-config || echo 1
 
 
     # - name: Install dependencies
