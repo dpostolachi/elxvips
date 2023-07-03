@@ -28,7 +28,8 @@ defmodule Elxvips.MixProject do
           "native/**/*.h",
           "native/**/Cargo.lock",
           "native/**/Cargo.toml",
-          "README.md"
+          "README.md",
+          "checksum-Elixir.Elxvips.Native.exs"
         ],
         licenses: [ "MIT" ],
         links: %{
