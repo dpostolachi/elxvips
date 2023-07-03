@@ -9,7 +9,16 @@ defmodule Elxvips.Native do
 	  base_url:
 		"#{ source_url }/releases/download/v#{version}",
 	  force_build: System.get_env("ELXVIPS_BUILD") in ["1", "true"],
-	  version: version
+	  version: version,
+    targets: ~w(
+      aarch64-apple-darwin
+      aarch64-unknown-linux-gnu
+      aarch64-unknown-linux-musl
+      arm-unknown-linux-gnueabihf
+      x86_64-apple-darwin
+      x86_64-unknown-linux-gnu
+      x86_64-unknown-linux-musl
+    )
 
 
   # NIFs
