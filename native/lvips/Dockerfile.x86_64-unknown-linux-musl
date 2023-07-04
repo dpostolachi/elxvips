@@ -1,0 +1,30 @@
+from amd64/alpine:3.18
+
+RUN apk --no-cache add \
+  elixir \
+  vips \
+  vips-dev \
+  clang \
+  build-base \
+  git \
+  libc6-compat \
+  libwebp-dev \
+  curl
+
+# install rustup
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+
+# add cargo to path
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+RUN rustup target add x86_64-unknown-linux-musl
+
+# set working directory
+WORKDIR /app
+
+# copy the source tree
+COPY . .
+
+# build for release
+RUN cargo build --target x86_64-unknown-linux-musl
+CMD cargo build --release --target x86_64-unknown-linux-musl
