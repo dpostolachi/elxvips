@@ -11,8 +11,10 @@ defmodule Elxvips.Native do
 	  force_build: System.get_env("ELXVIPS_BUILD") in ["1", "true"],
 	  version: version,
     targets: ~w(
+      x86_64-apple-darwin
       x86_64-unknown-linux-gnu
       x86_64-unknown-linux-musl
+      aarch64-apple-darwin
     )
 
 
