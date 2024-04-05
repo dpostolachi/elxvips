@@ -1,6 +1,6 @@
 # Used for local testing on Debian image
 
-FROM alpine:3.13
+FROM alpine:3.19.1
 RUN apk --no-cache add \
   elixir \
   vips \

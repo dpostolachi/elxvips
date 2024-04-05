@@ -278,6 +278,24 @@ defmodule Elxvips do
   def webp( image_file = %ImageBytes{}, opts ), do: format( image_file, :webp, Keyword.merge( @webp_default_opts, opts ) )
   def webp( { :ok, image }, opts ), do: webp( image, opts )
 
+  @avif_default_opts Keyword.merge( @save_opts_default, [ quality: 100 ] )
+@doc """
+  Will save the ImageFile in avif(AV1) format to a specified path. Accepts quality and strip options.
+  By default quality is set to 100
+
+  ## Examples
+      iex> import Elxvips
+      iex>
+      iex> from_file( "/path/input.jpg" )
+      iex> |> avif( quality: 72 )
+      iex  |> to_file( "/path/output.avif" )
+      { :ok, %ImageFile{} }
+  """
+  def avif( image, opts \\ [] )
+  def avif( image_file = %ImageFile{}, opts ), do: format( image_file, :avif, Keyword.merge( @avif_default_opts, opts ) )
+  def avif( image_file = %ImageBytes{}, opts ), do: format( image_file, :avif, Keyword.merge( @avif_default_opts, opts ) )
+  def avif( { :ok, image }, opts ), do: avif( image, opts )
+
   @doc """
   Will create an %ImageFile{} struct from path. This struct will be used for further processing.
 
