@@ -1,7 +1,7 @@
 defmodule Elxvips.MixProject do
   use Mix.Project
 
-  @version "0.1.4a"
+  @version "0.1.4-1"
   @source_url "https://github.com/dpostolachi/elxvips"
 
   def project do
