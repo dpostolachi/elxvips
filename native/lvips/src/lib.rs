@@ -4,7 +4,7 @@ use rustler::{Encoder, Env, Error, Term, Atom, NifStruct, NifResult};
 use std::env;
 mod libvips;
 use libvips::{VipsImage, VipsFormat};
-use libvips::save_options::{JpegSaveOptions, PngSaveOptions, WebPSaveOptions, SmartcropOptions, Interesting};
+use libvips::save_options::{JpegSaveOptions, PngSaveOptions, WebPSaveOptions, SmartcropOptions, Interesting, HeifsaveOptions};
 use rustler::types::atom::{ok, error};
 
 mod atoms {
@@ -14,6 +14,7 @@ mod atoms {
         png,
         jpg,
         webp,
+        avif,
     }
 }
 
@@ -67,6 +68,7 @@ fn format_to_atom( format: VipsFormat ) -> Atom {
         VipsFormat::JPEG => atoms::jpg(),
         VipsFormat::PNG => atoms::png(),
         VipsFormat::WEBP => atoms::webp(),
+        VipsFormat::AVIF => atoms::avif(),
     }
 }
 
@@ -76,6 +78,7 @@ fn image_into_bytes<'a>(image: VipsImage, save_options: &SaveOptions) -> Result<
         format if format == atoms::jpg() => VipsFormat::JPEG,
         format if format == atoms::png() => VipsFormat::PNG,
         format if format == atoms::webp() => VipsFormat::WEBP,
+        format if format == atoms::avif() => VipsFormat::AVIF,
         format if format == atoms::auto() => image.get_format().unwrap(),
         _ => {
             return Err( "format not supported".to_string() )
@@ -127,6 +130,22 @@ fn image_into_bytes<'a>(image: VipsImage, save_options: &SaveOptions) -> Result<
             };
 
             match image.webp_buffer_opts(&options) {
+                Ok ( bytes ) => {
+                    Ok( bytes )
+                }
+                Err( err )  => Err( format!( "failed to save image: {}", err ) )
+            }
+
+        },
+        VipsFormat::AVIF => {
+            let options = HeifsaveOptions {
+                q: save_options.quality as i32,
+                background: save_options.background.to_owned(),
+                compression: libvips::save_options::ForeignHeifCompression::Av1,
+                ..HeifsaveOptions::default()
+            };
+
+            match image.avif_buffer_opts(&options) {
                 Ok ( bytes ) => {
                     Ok( bytes )
                 }
@@ -270,6 +289,7 @@ fn save_image( image: &VipsImage, save_options: &SaveOptions ) -> Result<(), Str
         format if format == atoms::jpg() => VipsFormat::JPEG,
         format if format == atoms::png() => VipsFormat::PNG,
         format if format == atoms::webp() => VipsFormat::WEBP,
+        format if format == atoms::avif() => VipsFormat::AVIF,
         format if format == atoms::auto() => image.get_format().unwrap(),
         _ => {
             return Err( "format not supported".to_string() )
@@ -323,6 +343,19 @@ fn save_image( image: &VipsImage, save_options: &SaveOptions ) -> Result<(), Str
                 Err( err )  => Err( format!( "failed to save image: {}", err ) )
             }
 
+        },
+        VipsFormat::AVIF => {
+            let options = HeifsaveOptions {
+                q: save_options.quality as i32,
+                background: save_options.background.to_owned(),
+                compression: libvips::save_options::ForeignHeifCompression::Av1,
+                ..HeifsaveOptions::default()
+            };
+
+            match image.save_heif_opts(&save_options.path, &options) {
+                Ok ( () ) => Ok( () ),
+                Err( err )  => Err( format!( "failed to save image: {}", err ) )
+            }
         },
     }
 }

@@ -8,10 +8,13 @@ use utils::{c_string, null};
 use std::ffi::{CString};
 use save_options::{JpegSaveOptions, PngSaveOptions, WebPSaveOptions, SmartcropOptions};
 
+use self::save_options::HeifsaveOptions;
+
 pub enum VipsFormat {
     PNG,
     JPEG,
     WEBP,
+    AVIF,
 }
 
 pub fn error_buffer() -> String {
@@ -75,6 +78,7 @@ impl VipsImage {
             "jpegload"  | "jpegload_buffer" => Ok( VipsFormat::JPEG ),
             "pngload"   | "pngload_buffer" => Ok( VipsFormat::PNG ),
             "webpload"   | "webpload_buffer" => Ok( VipsFormat::WEBP ),
+            "heifload"  | "heifload_buffer" => Ok( VipsFormat::AVIF ),
             _ => Err( "unknown format".to_string() )
         }
     }
@@ -286,6 +290,27 @@ impl VipsImage {
             }
         }
     }
+    pub fn save_heif_opts( &self, path: &str, options: &save_options::HeifsaveOptions ) -> Result<(), String> {
+        let filename = c_string( path ).unwrap();
+        let profile = c_string(&options.profile).unwrap();
+        let params = globals::get_params().unwrap();
+
+        unsafe {
+            let background_array = bindings::vips_array_double_new(options.background.as_ptr(), options.background.len() as i32);
+
+            match bindings::vips_heifsave(
+                self.image as *mut bindings::_VipsImage,
+                filename.as_ptr(),
+                params.page_height.as_ptr(),        options.page_height,
+                params.q.as_ptr(),                  options.q,
+                params.background.as_ptr(),         background_array,
+                utils::NULL
+            ) {
+                0 => Ok( () ),
+                _ => Err( error_buffer() )
+            }
+        }
+    }
 
     pub fn save_jpeg( &self, path: &str ) -> Result<(), String> {
         let filename = c_string( path ).unwrap();
@@ -465,6 +490,31 @@ impl VipsImage {
                 params.q.as_ptr(),                  options.q,
                 params.strip.as_ptr(),              options.strip as i32,
                 params.background.as_ptr(),         background_array,
+                utils::NULL
+            ) {
+                0 => Ok( utils::get_buffer( buffer_out, buffer_buf_size ) ),
+                _ => Err( error_buffer() )
+            }
+        }
+    }
+
+    pub fn avif_buffer_opts( &self, options: &HeifsaveOptions ) -> Result<Vec<u8>, String> {
+        let mut buffer_buf_size: usize = 0;
+        let mut buffer_out = null();
+        let params = globals::get_params().unwrap();
+        let profile = c_string(&options.profile).unwrap();
+
+        unsafe {
+            let background_array = bindings::vips_array_double_new(options.background.as_ptr(), options.background.len() as i32);
+
+            match bindings::vips_heifsave_buffer(
+                self.image as *mut bindings::_VipsImage,
+                &mut buffer_out,
+                &mut buffer_buf_size,
+                params.page_height.as_ptr(),        options.page_height,
+                params.q.as_ptr(),                  options.q,
+                params.background.as_ptr(),         background_array,
+                params.compression.as_ptr(),        options.compression,
                 utils::NULL
             ) {
                 0 => Ok( utils::get_buffer( buffer_out, buffer_buf_size ) ),

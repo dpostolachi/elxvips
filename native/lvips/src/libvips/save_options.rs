@@ -256,6 +256,139 @@ pub struct SmartcropOptions {
     pub interesting: Interesting,
 }
 
+#[derive(Copy, Clone, Debug)]
+pub enum ForeignHeifCompression {
+    ///  `Hevc` -> VIPS_FOREIGN_HEIF_COMPRESSION_HEVC = 1
+    Hevc = 1,
+    ///  `Avc` -> VIPS_FOREIGN_HEIF_COMPRESSION_AVC = 2
+    Avc = 2,
+    ///  `Jpeg` -> VIPS_FOREIGN_HEIF_COMPRESSION_JPEG = 3
+    Jpeg = 3,
+    ///  `Av1` -> VIPS_FOREIGN_HEIF_COMPRESSION_AV1 = 4
+    Av1 = 4,
+    ///  `Last` -> VIPS_FOREIGN_HEIF_COMPRESSION_LAST = 5
+    Last = 5,
+}
+
+#[derive(Copy, Clone, Debug)]
+pub enum ForeignHeifEncoder {
+    ///  `Auto` -> VIPS_FOREIGN_HEIF_ENCODER_AUTO = 0
+    Auto = 0,
+    ///  `Aom` -> VIPS_FOREIGN_HEIF_ENCODER_AOM = 1
+    Aom = 1,
+    ///  `Rav1E` -> VIPS_FOREIGN_HEIF_ENCODER_RAV1E = 2
+    Rav1E = 2,
+    ///  `Svt` -> VIPS_FOREIGN_HEIF_ENCODER_SVT = 3
+    Svt = 3,
+    ///  `X265` -> VIPS_FOREIGN_HEIF_ENCODER_X265 = 4
+    X265 = 4,
+    ///  `Last` -> VIPS_FOREIGN_HEIF_ENCODER_LAST = 5
+    Last = 5,
+}
+
+#[derive(Copy, Clone, Debug)]
+pub enum ForeignKeep {
+    ///  `None` -> VIPS_FOREIGN_KEEP_NONE = 0
+    None = 0,
+    ///  `Exif` -> VIPS_FOREIGN_KEEP_EXIF = 1
+    Exif = 1,
+    ///  `Xmp` -> VIPS_FOREIGN_KEEP_XMP = 2
+    Xmp = 2,
+    ///  `Iptc` -> VIPS_FOREIGN_KEEP_IPTC = 4
+    Iptc = 4,
+    ///  `Icc` -> VIPS_FOREIGN_KEEP_ICC = 8
+    Icc = 8,
+    ///  `Other` -> VIPS_FOREIGN_KEEP_OTHER = 16
+    Other = 16,
+    ///  `All` -> VIPS_FOREIGN_KEEP_ALL = 31
+    All = 31,
+}
+
+#[derive(Copy, Clone, Debug)]
+pub enum ForeignSubsample {
+    ///  `Auto` -> VIPS_FOREIGN_SUBSAMPLE_AUTO = 0
+    Auto = 0,
+    ///  `On` -> VIPS_FOREIGN_SUBSAMPLE_ON = 1
+    On = 1,
+    ///  `Off` -> VIPS_FOREIGN_SUBSAMPLE_OFF = 2
+    Off = 2,
+    ///  `Last` -> VIPS_FOREIGN_SUBSAMPLE_LAST = 3
+    Last = 3,
+}
+
+/// Options for heifsave operation
+#[derive(Clone, Debug)]
+pub struct HeifsaveOptions {
+    /// q: `i32` -> Q factor
+    /// min: 1, max: 100, default: 50
+    pub q: i32,
+    /// bitdepth: `i32` -> Number of bits per pixel
+    /// min: 1, max: 16, default: 12
+    pub bitdepth: i32,
+    /// lossless: `bool` -> Enable lossless compression
+    /// default: false
+    pub lossless: bool,
+    /// compression: `ForeignHeifCompression` -> Compression format
+    ///  `Hevc` -> VIPS_FOREIGN_HEIF_COMPRESSION_HEVC = 1 [DEFAULT]
+    ///  `Avc` -> VIPS_FOREIGN_HEIF_COMPRESSION_AVC = 2
+    ///  `Jpeg` -> VIPS_FOREIGN_HEIF_COMPRESSION_JPEG = 3
+    ///  `Av1` -> VIPS_FOREIGN_HEIF_COMPRESSION_AV1 = 4
+    ///  `Last` -> VIPS_FOREIGN_HEIF_COMPRESSION_LAST = 5
+    pub compression: ForeignHeifCompression,
+    /// effort: `i32` -> CPU effort
+    /// min: 0, max: 9, default: 4
+    pub effort: i32,
+    /// subsample_mode: `ForeignSubsample` -> Select chroma subsample operation mode
+    ///  `Auto` -> VIPS_FOREIGN_SUBSAMPLE_AUTO = 0 [DEFAULT]
+    ///  `On` -> VIPS_FOREIGN_SUBSAMPLE_ON = 1
+    ///  `Off` -> VIPS_FOREIGN_SUBSAMPLE_OFF = 2
+    ///  `Last` -> VIPS_FOREIGN_SUBSAMPLE_LAST = 3
+    pub subsample_mode: ForeignSubsample,
+    /// encoder: `ForeignHeifEncoder` -> Select encoder to use
+    ///  `Auto` -> VIPS_FOREIGN_HEIF_ENCODER_AUTO = 0 [DEFAULT]
+    ///  `Aom` -> VIPS_FOREIGN_HEIF_ENCODER_AOM = 1
+    ///  `Rav1E` -> VIPS_FOREIGN_HEIF_ENCODER_RAV1E = 2
+    ///  `Svt` -> VIPS_FOREIGN_HEIF_ENCODER_SVT = 3
+    ///  `X265` -> VIPS_FOREIGN_HEIF_ENCODER_X265 = 4
+    ///  `Last` -> VIPS_FOREIGN_HEIF_ENCODER_LAST = 5
+    pub encoder: ForeignHeifEncoder,
+    /// keep: `ForeignKeep` -> Which metadata to retain
+    ///  `None` -> VIPS_FOREIGN_KEEP_NONE = 0
+    ///  `Exif` -> VIPS_FOREIGN_KEEP_EXIF = 1
+    ///  `Xmp` -> VIPS_FOREIGN_KEEP_XMP = 2
+    ///  `Iptc` -> VIPS_FOREIGN_KEEP_IPTC = 4
+    ///  `Icc` -> VIPS_FOREIGN_KEEP_ICC = 8
+    ///  `Other` -> VIPS_FOREIGN_KEEP_OTHER = 16
+    ///  `All` -> VIPS_FOREIGN_KEEP_ALL = 31 [DEFAULT]
+    pub keep: ForeignKeep,
+    /// background: `Vec<f64>` -> Background value
+    pub background: Vec<f64>,
+    /// page_height: `i32` -> Set page height for multipage save
+    /// min: 0, max: 10000000, default: 0
+    pub page_height: i32,
+    /// profile: `String` -> Filename of ICC profile to embed
+    pub profile: String,
+}
+
+impl std::default::Default for HeifsaveOptions {
+    fn default() -> Self {
+        HeifsaveOptions {
+            q: i32::from(50),
+            bitdepth: i32::from(12),
+            lossless: false,
+            compression: ForeignHeifCompression::Hevc,
+            effort: i32::from(4),
+            subsample_mode: ForeignSubsample::Auto,
+            encoder: ForeignHeifEncoder::Auto,
+            keep: ForeignKeep::All,
+            background: Vec::new(),
+            page_height: i32::from(0),
+            profile: String::from("sRGB"),
+        }
+    }
+}
+
+
 impl std::default::Default for SmartcropOptions {
     fn default() -> Self {
         SmartcropOptions {

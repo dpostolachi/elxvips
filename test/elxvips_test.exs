@@ -177,4 +177,27 @@ defmodule ElxvipsTest do
 
   end
 
+  test "from png to avif" do
+
+    format = from_file( "test/input.png" )
+    |> resize( width: 100, height: 100 )
+    |> avif()
+    |> to_bytes()
+    |> get_image_format()
+
+    assert format == { :ok, :avif }
+
+  end
+  test "from jpg to avif" do
+
+    format = from_file( "test/8k.jpg" )
+    |> resize( width: 100, height: 100 )
+    |> avif( quality: 72 )
+    |> to_file( "test/output3.avif" )
+    |> get_image_format()
+
+    assert format == { :ok, :avif }
+
+  end
+
 end
