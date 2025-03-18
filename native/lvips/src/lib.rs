@@ -15,6 +15,7 @@ mod atoms {
         jpg,
         webp,
         avif,
+        svg,
     }
 }
 
@@ -69,6 +70,7 @@ fn format_to_atom( format: VipsFormat ) -> Atom {
         VipsFormat::PNG => atoms::png(),
         VipsFormat::WEBP => atoms::webp(),
         VipsFormat::AVIF => atoms::avif(),
+        VipsFormat::SVG => atoms::svg(),
     }
 }
 
@@ -79,6 +81,7 @@ fn image_into_bytes<'a>(image: VipsImage, save_options: &SaveOptions) -> Result<
         format if format == atoms::png() => VipsFormat::PNG,
         format if format == atoms::webp() => VipsFormat::WEBP,
         format if format == atoms::avif() => VipsFormat::AVIF,
+        format if format == atoms::svg() => VipsFormat::SVG,
         format if format == atoms::auto() => image.get_format().unwrap(),
         _ => {
             return Err( "format not supported".to_string() )
@@ -153,6 +156,14 @@ fn image_into_bytes<'a>(image: VipsImage, save_options: &SaveOptions) -> Result<
             }
 
         },
+        VipsFormat::SVG => {
+            match image.svg_buffer() {
+                Ok ( bytes ) => {
+                    Ok( bytes )
+                }
+                Err( err )  => Err( format!( "failed to save image: {}", err ) )
+            }
+        }
     }
 }
 
@@ -290,6 +301,7 @@ fn save_image( image: &VipsImage, save_options: &SaveOptions ) -> Result<(), Str
         format if format == atoms::png() => VipsFormat::PNG,
         format if format == atoms::webp() => VipsFormat::WEBP,
         format if format == atoms::avif() => VipsFormat::AVIF,
+        format if format == atoms::svg() => VipsFormat::SVG,
         format if format == atoms::auto() => image.get_format().unwrap(),
         _ => {
             return Err( "format not supported".to_string() )
@@ -357,6 +369,12 @@ fn save_image( image: &VipsImage, save_options: &SaveOptions ) -> Result<(), Str
                 Err( err )  => Err( format!( "failed to save image: {}", err ) )
             }
         },
+        VipsFormat::SVG => {
+            match image.save_svg(&save_options.path) {
+                Ok ( () ) => Ok( () ),
+                Err( err )  => Err( format!( "failed to save image: {}", err ) )
+            }
+        }
     }
 }
 

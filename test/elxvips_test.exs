@@ -83,7 +83,7 @@ defmodule ElxvipsTest do
 
   test "from file bytes" do
     file = File.open!( "test/input.png", [ :read ] )
-    bytes = IO.binread( file, :all )
+    bytes = IO.binread( file, :eof )
 
     result = from_bytes( bytes )
     |> resize( width: 100, height: 100 )
@@ -106,7 +106,7 @@ defmodule ElxvipsTest do
   test "from file bytes, autodetect format" do
 
     file = File.open!( "test/input.png", [ :read ] )
-    bytes = IO.binread( file, :all )
+    bytes = IO.binread( file, :eof )
 
     sizes = from_bytes( bytes )
     |> resize( width: 100, height: 100 )
@@ -166,7 +166,7 @@ defmodule ElxvipsTest do
   test "from pdf bytes, autodetect format" do
 
     file = File.open!( "test/sample.pdf", [ :read ] )
-    bytes = IO.binread( file, :all )
+    bytes = IO.binread( file, :eof )
 
     sizes = from_pdf_bytes( bytes, page: 0 )
     |> resize( width: 100, height: 100 )
@@ -198,6 +198,43 @@ defmodule ElxvipsTest do
 
     assert format == { :ok, :avif }
 
+  end
+
+  test "svg to png" do
+    format = from_file( "test/input.svg" )
+    |> resize( width: 124 )
+    |> png( quality: 90 )
+    |> to_file( "test/svg_output.png" )
+    |> get_image_format()
+
+    assert format == { :ok, :png }
+  end
+
+  test "svg format check" do
+    format = from_file( "test/input.svg" )
+    |> get_image_format()
+
+    assert format == { :ok, :svg }
+  end
+
+  test "png to svg" do
+    format = from_file( "test/input.png" )
+    |> resize( width: 500 )
+    |> svg()
+    |> to_file( "test/png_output.svg" )
+    |> get_image_format()
+
+    assert format == { :ok, :svg }
+  end
+
+  test "svg to svg" do
+    format = from_file( "test/input.svg" )
+    |> resize( width: 100 )
+    |> svg()
+    |> to_file( "test/svg_output.svg" )
+    |> get_image_format()
+
+    assert format == { :ok, :svg }
   end
 
 end
