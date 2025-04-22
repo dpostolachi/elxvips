@@ -279,7 +279,7 @@ defmodule Elxvips do
   def webp( { :ok, image }, opts ), do: webp( image, opts )
 
   @avif_default_opts Keyword.merge( @save_opts_default, [ quality: 100 ] )
-@doc """
+  @doc """
   Will save the ImageFile in avif(AV1) format to a specified path. Accepts quality and strip options.
   By default quality is set to 100
 
@@ -296,6 +296,25 @@ defmodule Elxvips do
   def avif( image_file = %ImageBytes{}, opts ), do: format( image_file, :avif, Keyword.merge( @avif_default_opts, opts ) )
   def avif( { :ok, image }, opts ), do: avif( image, opts )
 
+
+  @doc """
+  Will save the ImageFile in SVG format to a specified path. Accepts no options.
+  Highly discouraged to use this function, since it will embed the image in the svg file.
+  In case an svg is used as input, it will just copy the file.
+
+  ## Examples
+      iex> import Elxvips
+      iex>
+      iex> from_file( "/path/input.jpg" )
+      iex> |> svg()
+      iex  |> to_file( "/path/output.svg" )
+      { :ok, %ImageFile{} }
+
+  """
+  def svg( image, opts \\ [] )
+  def svg( image_file = %ImageFile{}, opts ), do: format( image_file, :svg, opts )
+  def svg( image_file = %ImageBytes{}, opts ), do: format( image_file, :svg, opts )
+  def svg( { :ok, image }, opts ), do: svg( image, opts )
   @doc """
   Will create an %ImageFile{} struct from path. This struct will be used for further processing.
 

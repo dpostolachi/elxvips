@@ -388,6 +388,17 @@ impl std::default::Default for HeifsaveOptions {
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct SvgSaveOptions {
+}
+
+impl std::default::Default for SvgSaveOptions {
+    fn default() -> Self {
+        SvgSaveOptions {
+        }
+    }
+}
+
 
 impl std::default::Default for SmartcropOptions {
     fn default() -> Self {

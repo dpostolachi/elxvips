@@ -12,6 +12,7 @@ defmodule ElxvipsTest do
     |> resize( width: 250, height: 300 )
     |> jpg( quality: 60 )
     |> to_bytes()
+    |> from_bytes()
     |> get_image_sizes()
 
     assert result == { :ok, [ 250, 300 ] }
@@ -22,6 +23,7 @@ defmodule ElxvipsTest do
     |> resize( width: 300, height: 250 )
     |> png( quality: 60 )
     |> to_bytes()
+    |> from_bytes()
     |> get_image_sizes()
 
     assert result == { :ok, [ 300, 250 ] }
@@ -34,6 +36,7 @@ defmodule ElxvipsTest do
     { :ok, [ output_width, output_height ] } = input_image
     |> png( quality: 60 )
     |> to_bytes()
+    |> from_bytes()
     |> get_image_sizes()
 
     assert [ input_width, input_height ] == [ output_width, output_height ]
@@ -44,6 +47,7 @@ defmodule ElxvipsTest do
     |> resize( width: 200, height: 100 )
     |> jpg( quality: 60 )
     |> to_bytes()
+    |> from_bytes()
     |> get_image_sizes()
 
     assert result == { :ok, [ 200, 100 ] }
@@ -54,6 +58,7 @@ defmodule ElxvipsTest do
     |> resize( width: 100, height: 200 )
     |> jpg( quality: 60 )
     |> to_bytes()
+    |> from_bytes()
     |> get_image_sizes()
 
     assert result == { :ok, [ 100, 200 ] }
@@ -79,6 +84,7 @@ defmodule ElxvipsTest do
     |> resize( height: 720 )
     |> jpg( strip: true )
     |> to_bytes()
+    |> from_bytes()
     |> get_image_sizes()
     assert result == { :ok, [ 1080, 720 ] }
   end
@@ -91,6 +97,7 @@ defmodule ElxvipsTest do
     |> resize( width: 100, height: 100 )
     |> png()
     |> to_bytes()
+    |> from_bytes()
 
     sizes = result
     |> get_image_sizes()
@@ -113,6 +120,7 @@ defmodule ElxvipsTest do
     sizes = from_bytes( bytes )
     |> resize( width: 100, height: 100 )
     |> to_bytes()
+    |> from_bytes()
     |> get_image_sizes()
 
     assert sizes == { :ok, [ 100, 100 ] }
@@ -150,6 +158,7 @@ defmodule ElxvipsTest do
     |> background( [ 255, 0, 255 ] )
     |> jpg()
     |> to_file( "test/output2.jpg" )
+    |> from_file()
     |> get_image_format()
 
     assert format == { :ok, :jpg }
@@ -176,6 +185,7 @@ defmodule ElxvipsTest do
     sizes = from_pdf_bytes( bytes, page: 0 )
     |> resize( width: 100, height: 100 )
     |> to_bytes()
+    |> from_bytes()
     |> get_image_sizes()
 
     assert sizes == { :ok, [ 100, 100 ] }
@@ -205,6 +215,46 @@ defmodule ElxvipsTest do
 
     assert format == { :ok, :avif }
 
+  end
+
+  test "svg to png" do
+    format = from_file( "test/input.svg" )
+    |> resize( width: 124 )
+    |> png( quality: 90 )
+    |> to_file( "test/svg_output.png" )
+    |> from_file()
+    |> get_image_format()
+
+    assert format == { :ok, :png }
+  end
+
+  test "svg format check" do
+    format = from_file( "test/input.svg" )
+    |> get_image_format()
+
+    assert format == { :ok, :svg }
+  end
+
+  test "png to svg" do
+    format = from_file( "test/input.png" )
+    |> resize( width: 500 )
+    |> svg()
+    |> to_file( "test/png_output.svg" )
+    |> from_file()
+    |> get_image_format()
+
+    assert format == { :ok, :svg }
+  end
+
+  test "svg to svg" do
+    format = from_file( "test/input.svg" )
+    |> resize( width: 100 )
+    |> svg()
+    |> to_file( "test/svg_output.svg" )
+    |> from_file()
+    |> get_image_format()
+
+    assert format == { :ok, :svg }
   end
 
 end

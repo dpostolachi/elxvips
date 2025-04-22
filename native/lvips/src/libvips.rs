@@ -7,14 +7,18 @@ use std::ffi::{CStr, c_void};
 use utils::{c_string, null};
 use std::ffi::{CString};
 use save_options::{JpegSaveOptions, PngSaveOptions, WebPSaveOptions, SmartcropOptions};
+use base64::{engine::general_purpose, Engine as _};
+use std::fs;
 
 use self::save_options::HeifsaveOptions;
 
+#[derive(PartialEq)]
 pub enum VipsFormat {
     PNG,
     JPEG,
     WEBP,
     AVIF,
+    SVG,
 }
 
 pub fn error_buffer() -> String {
@@ -34,8 +38,16 @@ pub fn concurrency_set( max: i32 ) {
     }
 }
 
+#[derive(Clone)]
+enum ImageSource {
+    File( String ),
+    Buffer( Vec<u8> ),
+    None,
+}
+
 pub struct VipsImage {
     image: *mut bindings::_VipsImage,
+    source: ImageSource,
 }
 
 impl VipsImage {
@@ -79,6 +91,7 @@ impl VipsImage {
             "pngload"   | "pngload_buffer" => Ok( VipsFormat::PNG ),
             "webpload"   | "webpload_buffer" => Ok( VipsFormat::WEBP ),
             "heifload"  | "heifload_buffer" => Ok( VipsFormat::AVIF ),
+            "svgload"   | "svgload_buffer" => Ok( VipsFormat::SVG ),
             _ => Err( "unknown format".to_string() )
         }
     }
@@ -93,6 +106,7 @@ impl VipsImage {
             } else {
                 Ok( VipsImage{
                     image: image,
+                    source: ImageSource::File( path.to_string() ),
                 } )
             }
         }
@@ -115,6 +129,7 @@ impl VipsImage {
             ) {
                 0 => Ok( VipsImage{
                     image: output,
+                    source: ImageSource::File( path.to_string() ),
                 } ),
                 _ => Err( error_buffer() )
             }
@@ -141,6 +156,7 @@ impl VipsImage {
             } else {
                 Ok( VipsImage{
                     image: image,
+                    source: ImageSource::Buffer( buffer.to_vec() ),
                 } )
             }
         }
@@ -161,6 +177,7 @@ impl VipsImage {
             } else {
                 Ok( VipsImage{
                     image: image,
+                    source: ImageSource::Buffer( buffer.to_vec() ),
                 } )
             }
         }
@@ -173,6 +190,7 @@ impl VipsImage {
             match bindings::vips_crop( input, &mut output, left, top, width, height, utils::NULL ) {
                 0 => Ok( VipsImage{
                     image: output,
+                    source: self.source.clone(),
                 } ),
                 _ => Err( error_buffer() )
             }
@@ -185,6 +203,7 @@ impl VipsImage {
             match bindings::vips_smartcrop( input, &mut output, width, height, utils::NULL ) {
                 0 => Ok( VipsImage{
                     image: output,
+                    source: self.source.clone(),
                 } ),
                 _ => Err( error_buffer() )
             }
@@ -206,6 +225,7 @@ impl VipsImage {
             ) {
                 0 => Ok( VipsImage{
                     image: output,
+                    source: self.source.clone(),
                 } ),
                 _ => Err( error_buffer() )
             }
@@ -310,6 +330,12 @@ impl VipsImage {
                 _ => Err( error_buffer() )
             }
         }
+    }
+
+    pub fn save_svg( &self, path: &str ) -> Result<(), String> {
+        let buffer = self.svg_buffer().unwrap();
+        fs::write( path, buffer ).unwrap();
+        Ok( () )
     }
 
     pub fn save_jpeg( &self, path: &str ) -> Result<(), String> {
@@ -498,6 +524,23 @@ impl VipsImage {
         }
     }
 
+    pub fn avif_buffer( &self ) -> Result<Vec<u8>, String> {
+        let mut buffer_buf_size: usize = 0;
+        let mut buffer_out = null();
+
+        unsafe {
+            match bindings::vips_heifsave_buffer(
+                self.image as *mut bindings::_VipsImage,
+                &mut buffer_out,
+                &mut buffer_buf_size,
+                utils::NULL
+            ) {
+                0 => Ok( utils::get_buffer( buffer_out, buffer_buf_size ) ),
+                _ => Err( error_buffer() )
+            }
+        }
+    }
+
     pub fn avif_buffer_opts( &self, options: &HeifsaveOptions ) -> Result<Vec<u8>, String> {
         let mut buffer_buf_size: usize = 0;
         let mut buffer_out = null();
@@ -523,6 +566,58 @@ impl VipsImage {
         }
     }
 
+    pub fn svg_buffer_opts( &self ) -> Result<Vec<u8>, String> {
+        let format = self.get_format().unwrap();
+
+        if format == VipsFormat::SVG {
+            // already svg, return raw buffer
+            let buffer = self.raw_buffer().unwrap();
+            return Ok( buffer );
+        }
+
+        let buffer = self.to_buffer().unwrap();
+
+        let [ width, height ] = [ self.get_width(), self.get_height() ];
+
+        let mime_type = match format {
+            VipsFormat::JPEG => "image/jpeg",
+            VipsFormat::PNG => "image/png",
+            VipsFormat::WEBP => "image/webp",
+            VipsFormat::AVIF => "image/avif",
+            VipsFormat::SVG => "image/svg+xml",
+        };
+
+        let svg = format!(
+            "<svg width=\"{}\" height=\"{}\" viewBox=\"0 0 {} {}\" xmlns=\"http://www.w3.org/2000/svg\"><image href=\"data:{};base64,{}\" width=\"{}\" height=\"{}\"/></svg>",
+            width,
+            height,
+            width,
+            height,
+            mime_type,
+            general_purpose::STANDARD.encode( &buffer ),
+            width,
+            height
+        );
+
+        let svg_bytes = svg.as_bytes().to_vec();
+        Ok( svg_bytes )
+    }
+
+    pub fn svg_buffer( &self ) -> Result<Vec<u8>, String> {
+        return self.svg_buffer_opts();
+    }
+
+    pub fn raw_buffer( &self ) -> Result<Vec<u8>, String> {
+        match self.source {
+            ImageSource::Buffer( ref buffer ) => Ok( buffer.clone() ),
+            ImageSource::File( ref path ) => {
+                let buffer = fs::read( path ).unwrap();
+                Ok( buffer )
+            },
+            ImageSource::None => Err( "no source".to_string() )
+        }
+    }
+
     pub fn resize( &self, scale: f64 ) -> Result<VipsImage, String> {
         unsafe {
             let mut output: *mut bindings::VipsImage = null();
@@ -535,11 +630,23 @@ impl VipsImage {
             ) {
                 0 => Ok( VipsImage{
                     image: output,
+                    source: self.source.clone(),
                 } ),
                 _ => Err( error_buffer() )
             }
         }
     }
+
+    pub fn to_buffer( &self ) -> Result<Vec<u8>, String> {
+        match self.get_format().unwrap() {
+            VipsFormat::JPEG => self.jpeg_buffer(),
+            VipsFormat::PNG => self.png_buffer(),
+            VipsFormat::WEBP => self.webp_buffer(),
+            VipsFormat::AVIF => self.avif_buffer(),
+            VipsFormat::SVG => self.raw_buffer(),
+        }
+    }
+
 
 }
 

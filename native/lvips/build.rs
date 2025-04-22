@@ -55,7 +55,7 @@ fn main() {
     let bindings = bindings_default
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed.
-        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
         // Finish the builder and generate the bindings.
         .allowlist_function( "vips_error_buffer" )
         .allowlist_function( "vips_error_clear" )

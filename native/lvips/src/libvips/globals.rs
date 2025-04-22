@@ -1,6 +1,7 @@
 use std::sync::{Once};
 use std::ffi::{CString};
 use super::utils::{c_string};
+use std::sync::LazyLock;
 
 pub struct GlobalsParams {
     pub page_height:            CString,
@@ -63,19 +64,10 @@ impl Default for GlobalsParams {
     }
 }
 
-static mut GLOBAL_PARAMS: Option<GlobalsParams> = None;
+static GLOBAL_PARAMS: LazyLock<GlobalsParams> = LazyLock::new(|| {
+    GlobalsParams::default()
+});
 
 pub fn get_params() -> Result<&'static GlobalsParams, &'static str> {
-    static ONCE: Once = Once::new();
-
-    unsafe {
-        ONCE.call_once(|| {
-            GLOBAL_PARAMS = Some(GlobalsParams::default())
-        });
-
-        match &GLOBAL_PARAMS {
-            Some( params ) => Ok( &params ),
-            None => Err( "failed to get params" )
-        }
-    }
+    Ok(&GLOBAL_PARAMS)
 }
