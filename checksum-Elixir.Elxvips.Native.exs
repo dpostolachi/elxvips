@@ -1,10 +1,10 @@
 %{
-  "liblvips-v0.1.5-nif-2.15-aarch64-apple-darwin.so.tar.gz" => "sha256:a9470a2ac730ada93c5a11606817b4a2ae99e6b599a35bc7224b2226715ba62b",
-  "liblvips-v0.1.5-nif-2.15-x86_64-apple-darwin.so.tar.gz" => "sha256:aed24375b4590177ad4d2a6981df23b51ccdc77be38e98163cb6b44026d53b5e",
-  "liblvips-v0.1.5-nif-2.15-x86_64-unknown-linux-gnu.so.tar.gz" => "sha256:26573bcd4ecb3aa838ce4eb3bd8d9c5be9242ed6298439eb8ceb2af80dad90a5",
-  "liblvips-v0.1.5-nif-2.15-x86_64-unknown-linux-musl.so.tar.gz" => "sha256:c13907ffbd7f5119e5ac565e7649d17fb435472a62269aeaafdcb5dcaeef3c3b",
-  "liblvips-v0.1.5-nif-2.16-aarch64-apple-darwin.so.tar.gz" => "sha256:2219debf9522b4bb50d33489bb3987094039e825c2524224af104f811675205e",
-  "liblvips-v0.1.5-nif-2.16-x86_64-apple-darwin.so.tar.gz" => "sha256:62dbcd2ea3a0a64239242abe382f52188fa37252c262045c12230048cd32d9ca",
-  "liblvips-v0.1.5-nif-2.16-x86_64-unknown-linux-gnu.so.tar.gz" => "sha256:cfae7a3dc4f48e1e749c4fe07aea232235bd47b52d0c9e8e01b63e9807e5ca73",
-  "liblvips-v0.1.5-nif-2.16-x86_64-unknown-linux-musl.so.tar.gz" => "sha256:a22d3845e62b99e848f32e2b10ab8399a5a38c66036882844cc3638574d1b6de",
+  "liblvips-v0.1.6-nif-2.15-aarch64-apple-darwin.so.tar.gz" => "sha256:703724cf0eba24d0d01fff995cfb401602cff8e7a5e7196023d05d0ea1b6c07f",
+  "liblvips-v0.1.6-nif-2.15-x86_64-apple-darwin.so.tar.gz" => "sha256:fe63b64bbfafed2a36ffe135a6dacf9a585084e2c1287e51cb8c9d56b1d146f4",
+  "liblvips-v0.1.6-nif-2.15-x86_64-unknown-linux-gnu.so.tar.gz" => "sha256:9bb41b1b5b2812536291103bde40452af204be465d462efcc0f5e0eab882ecf2",
+  "liblvips-v0.1.6-nif-2.15-x86_64-unknown-linux-musl.so.tar.gz" => "sha256:bec3343dac253c474df204026706fc848584fda10148eba97842224fbc0b76c4",
+  "liblvips-v0.1.6-nif-2.16-aarch64-apple-darwin.so.tar.gz" => "sha256:7def7ffd5a6d0aeb6f6606da7e832732c38bc902659249c4be5cfeee88c01ba0",
+  "liblvips-v0.1.6-nif-2.16-x86_64-apple-darwin.so.tar.gz" => "sha256:c70645b4f8cdcb17250dc0b69bcefca1424b999f1176aaf0f17a62d296f578b7",
+  "liblvips-v0.1.6-nif-2.16-x86_64-unknown-linux-gnu.so.tar.gz" => "sha256:cf9181d698e1fae3fb583968c6205f892d6ca108c08fb10f394166546771ac1a",
+  "liblvips-v0.1.6-nif-2.16-x86_64-unknown-linux-musl.so.tar.gz" => "sha256:79d1ea0ceff31981147fc0e4e45d0579887b842c7a36d4159717231acb537399",
 }
