@@ -68,7 +68,7 @@ defmodule Elxvips do
       err -> err
     end
   end
-  defp process_to_file( image_bytes = %ImageBytes{ :bytes => bytes }, path ) when is_binary( path ) and is_list( bytes ) do
+  defp process_to_file( image_bytes = %ImageBytes{ :bytes => bytes }, path ) when is_binary( path ) and is_bitstring( bytes ) do
     image_bytes = %ImageBytes{ image_bytes |
       :save => Kernel.struct( image_bytes.save, [ path: path ] )
     }
@@ -91,7 +91,7 @@ defmodule Elxvips do
     end
   end
   # In case we have raw bytes
-  defp process_to_bytes( image_bytes = %ImageBytes{ :bytes => bytes } ) when is_list( bytes ) do
+  defp process_to_bytes( image_bytes = %ImageBytes{ :bytes => bytes } ) when is_bitstring( bytes ) do
     with { :ok, bytes } <- Elxvips.Native.vips_process_bytes_to_bytes( image_bytes ) do
       { :ok, %ImageBytes{
         :bytes => bytes,
@@ -311,6 +311,9 @@ defmodule Elxvips do
       :path => path,
     } }
   end
+  def from_file( { :ok, %ImageFile{} = image_file } ) do
+    { :ok, image_file }
+  end
 
   @doc """
   Will create an %ImageFile{} struct from a pdf path. This struct will be used for further processing.
@@ -350,14 +353,12 @@ defmodule Elxvips do
       %ImageBytes{}
 
   """
-  def from_bytes( bytes ) when is_list( bytes ) do
-    { :ok, %ImageBytes{
-      :bytes => bytes,
-    } }
+  def from_bytes( { :ok, %ImageBytes{} = image_bytes } ) do
+    { :ok, image_bytes }
   end
   def from_bytes( bytes ) when is_bitstring( bytes ) do
     { :ok, %ImageBytes{
-      :bytes => :erlang.binary_to_list( bytes ),
+      :bytes => bytes,
     } }
   end
 
@@ -377,7 +378,7 @@ defmodule Elxvips do
 
   """
   def from_pdf_bytes( bytes ), do: from_pdf_bytes( bytes, [] )
-  def from_pdf_bytes( bytes, opts ) when is_list( bytes ) do
+  def from_pdf_bytes( bytes, opts ) when is_bitstring( bytes ) do
     page = Keyword.get( opts, :page, 0 )
     n = Keyword.get( opts, :n, 1 )
 
@@ -394,7 +395,7 @@ defmodule Elxvips do
     n = Keyword.get( opts, :n, 1 )
 
     { :ok, %ImageBytes{
-      :bytes => :erlang.binary_to_list( bytes ),
+      :bytes => bytes,
       :pdf => true,
       :page => page,
       :n => n
@@ -446,13 +447,10 @@ defmodule Elxvips do
       iex> |> get_image_sizes()
       {:ok, [640, 486]}
   """
-  def get_image_sizes( path ) when is_binary( path ), do: Elxvips.Native.vips_get_image_sizes( path )
-  def get_image_sizes( bytes ) when is_list( bytes ), do: Elxvips.Native.vips_get_image_bytes_sizes( bytes )
+  def get_image_sizes( %ImageFile{ :path => path } ), do: Elxvips.Native.vips_get_image_sizes( path )
+  def get_image_sizes( {:ok, image_file = %ImageFile{ :path => path } } ) when is_binary( path ), do: get_image_sizes( image_file )
 
-  def get_image_sizes( %ImageFile{ :path => path } ), do: get_image_sizes( path )
-  def get_image_sizes( {:ok, %ImageFile{ :path => path } } ), do: get_image_sizes( path )
-
-  def get_image_sizes( %ImageBytes{ :bytes => bytes } ) when is_list( bytes ), do: get_image_sizes( bytes )
+  def get_image_sizes( %ImageBytes{ :bytes => bytes } ) when is_bitstring( bytes ), do: Elxvips.Native.vips_get_image_bytes_sizes( bytes )
   def get_image_sizes( { :ok, image_bytes = %ImageBytes{} } ), do: get_image_sizes( image_bytes )
 
   @doc """
@@ -465,13 +463,10 @@ defmodule Elxvips do
       iex> |> get_image_format()
       {:ok, :png}
   """
-  def get_image_format( path ) when is_binary( path ), do: Elxvips.Native.vips_get_image_file_format( path )
-  def get_image_format( bytes ) when is_list( bytes ), do: Elxvips.Native.vips_get_image_bytes_format( bytes )
+  def get_image_format( %ImageFile{ :path => path } ), do: Elxvips.Native.vips_get_image_file_format( path )
+  def get_image_format( {:ok, image_file = %ImageFile{} } ), do: get_image_format( image_file )
 
-  def get_image_format( %ImageFile{ :path => path } ), do: get_image_format( path )
-  def get_image_format( {:ok, %ImageFile{ :path => path } } ), do: get_image_format( path )
-
-  def get_image_format( %ImageBytes{ :bytes => bytes } ) when is_list( bytes ), do: get_image_format( bytes )
+  def get_image_format( %ImageBytes{ :bytes => bytes } ), do: Elxvips.Native.vips_get_image_bytes_format( bytes )
   def get_image_format( { :ok, image_bytes = %ImageBytes{} } ), do: get_image_format( image_bytes )
 
 end

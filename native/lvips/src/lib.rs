@@ -1,6 +1,6 @@
 extern crate num_cpus;
 
-use rustler::{Encoder, Env, Error, Term, Atom, NifStruct, NifResult};
+use rustler::{Encoder, Env, Error, Term, Atom, NifStruct, NifResult, Binary, OwnedBinary};
 use std::env;
 mod libvips;
 use libvips::{VipsImage, VipsFormat};
@@ -48,10 +48,10 @@ struct ImageFile {
     pub n: i32,
 }
 
-#[derive(NifStruct, Debug)]
+#[derive(NifStruct)]
 #[module = "Elxvips.ImageBytes"]
-struct ImageBytes {
-    pub bytes: Vec<u8>,
+struct ImageBytes<'a> {
+    pub bytes: Binary<'a>,
     pub resize: ResizeOptions,
     pub save: SaveOptions,
     pub pdf: bool,
@@ -164,7 +164,7 @@ fn image_from_bytes(buffer: &[u8]) -> Result<VipsImage, String> {
 }
 
 #[rustler::nif]
-fn vips_get_image_bytes_sizes<'a>(env: Env<'a>, bytes: Vec<u8>) -> Result<Term<'a>, Error> {
+fn vips_get_image_bytes_sizes<'a>(env: Env<'a>, bytes: Binary<'a>) -> Result<Term<'a>, Error> {
     let result = match image_from_bytes( &bytes ) {
         Ok( image ) => Ok( [ image.get_width(), image.get_height() ] ),
         Err( err ) => Err( format!( "failed to read image from bytes: {}", err ) )
@@ -192,7 +192,7 @@ fn vips_get_image_file_format<'a>(env: Env<'a>, path: &str) -> Result<Term<'a>, 
 }
 
 #[rustler::nif]
-fn vips_get_image_bytes_format<'a>(env: Env<'a>, bytes: Vec<u8>) -> Result<Term<'a>, Error> {
+fn vips_get_image_bytes_format<'a>(env: Env<'a>, bytes: Binary<'a>) -> Result<Term<'a>, Error> {
     let result = match image_from_bytes( &bytes ) {
         Ok( image ) => {
             Ok( image.get_format().unwrap() )
@@ -405,7 +405,12 @@ fn vips_process_file_to_bytes<'a>(env: Env<'a>, image_input: ImageFile) -> Resul
     };
 
     match result {
-        Ok( bytes ) => Ok( ( ok(), bytes ).encode( env ) ),
+        Ok( bytes ) => {
+            let mut own_binary = OwnedBinary::new( bytes.len() ).unwrap();
+            own_binary.as_mut_slice().copy_from_slice( &bytes );
+            let binary = Binary::from_owned( own_binary, env );
+            Ok( ( ok(), binary ).encode( env ) )
+        },
         Err( err ) => Ok( ( error(), err ).encode( env ) )
     }
 }
@@ -423,7 +428,12 @@ fn vips_process_bytes_to_bytes<'a>(env: Env<'a>, image_input: ImageBytes) -> Res
     };
 
     match result {
-        Ok( bytes ) => Ok( ( ok(), bytes ).encode( env ) ),
+        Ok( bytes ) => {
+            let mut binary = OwnedBinary::new( bytes.len() ).unwrap();
+            binary.as_mut_slice().copy_from_slice( &bytes );
+            let binary = Binary::from_owned( binary, env );
+            Ok( ( ok(), binary ).encode( env ) )
+        },
         Err( err ) => Ok( ( error(), err ).encode( env ) )
     }
 }
@@ -446,23 +456,4 @@ fn vips_process_bytes_to_file<'a>(env: Env<'a>, image_input: ImageBytes) -> Resu
     }
 }
 
-#[rustler::nif]
-fn probe() -> Atom {
-    ok()
-}
-
-rustler::init!("Elixir.Elxvips.Native", [
-        vips_process_file_to_file,
-        vips_process_file_to_bytes,
-        
-        vips_process_bytes_to_bytes,
-        vips_process_bytes_to_file,
-
-        vips_get_image_sizes,
-        vips_get_image_bytes_sizes,
-
-        vips_get_image_file_format,
-        vips_get_image_bytes_format,
-        
-        set_concurrency,
-], load=on_load );
+rustler::init!("Elixir.Elxvips.Native", load=on_load );

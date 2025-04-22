@@ -64,9 +64,11 @@ defmodule ElxvipsTest do
     |> resize( height: 150, width: 150 )
     |> jpg( strip: false )
     |> to_bytes()
+    |> from_bytes()
     |> resize( width: 100, height: 120 )
     |> png()
     |> to_bytes()
+    |> from_bytes()
     |> get_image_sizes()
 
     assert result == { :ok, [ 100, 120 ] }
@@ -83,7 +85,7 @@ defmodule ElxvipsTest do
 
   test "from file bytes" do
     file = File.open!( "test/input.png", [ :read ] )
-    bytes = IO.binread( file, :all )
+    bytes = IO.binread( file, :eof )
 
     result = from_bytes( bytes )
     |> resize( width: 100, height: 100 )
@@ -106,7 +108,7 @@ defmodule ElxvipsTest do
   test "from file bytes, autodetect format" do
 
     file = File.open!( "test/input.png", [ :read ] )
-    bytes = IO.binread( file, :all )
+    bytes = IO.binread( file, :eof )
 
     sizes = from_bytes( bytes )
     |> resize( width: 100, height: 100 )
@@ -121,6 +123,7 @@ defmodule ElxvipsTest do
     format = from_file( "test/input.png" )
     |> resize( width: 100, height: 100 )
     |> to_bytes()
+    |> from_bytes()
     |> get_image_format()
 
     assert format == { :ok, :png }
@@ -133,6 +136,7 @@ defmodule ElxvipsTest do
     |> resize( width: 100, height: 100 )
     |> webp()
     |> to_bytes()
+    |> from_bytes()
     |> get_image_format()
 
     assert format == { :ok, :webp }
@@ -157,6 +161,7 @@ defmodule ElxvipsTest do
       |> resize( width: 500 )
       |> png()
       |> to_file( "test/pdf_output.png" )
+      |> from_file()
       |> get_image_format()
 
       assert format == { :ok, :png }
@@ -166,7 +171,7 @@ defmodule ElxvipsTest do
   test "from pdf bytes, autodetect format" do
 
     file = File.open!( "test/sample.pdf", [ :read ] )
-    bytes = IO.binread( file, :all )
+    bytes = IO.binread( file, :eof )
 
     sizes = from_pdf_bytes( bytes, page: 0 )
     |> resize( width: 100, height: 100 )
@@ -183,6 +188,7 @@ defmodule ElxvipsTest do
     |> resize( width: 100, height: 100 )
     |> avif()
     |> to_bytes()
+    |> from_bytes()
     |> get_image_format()
 
     assert format == { :ok, :avif }
@@ -194,6 +200,7 @@ defmodule ElxvipsTest do
     |> resize( width: 100, height: 100 )
     |> avif( quality: 72 )
     |> to_file( "test/output3.avif" )
+    |> from_file()
     |> get_image_format()
 
     assert format == { :ok, :avif }
