@@ -38,6 +38,12 @@ pub fn concurrency_set( max: i32 ) {
     }
 }
 
+pub fn vips_init() {
+    unsafe {
+        bindings::vips_init( CString::new( "lvips" ).unwrap().as_ptr() );
+    }
+}
+
 #[derive(Clone)]
 enum ImageSource {
     File( String ),

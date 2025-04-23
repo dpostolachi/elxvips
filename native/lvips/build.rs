@@ -81,6 +81,7 @@ fn main() {
         .allowlist_function( "g_free" )
         .allowlist_function( "vips_pdfload" )
         .allowlist_function( "vips_pdfload_buffer" )
+        .allowlist_function( "vips_init" )
         .allowlist_var( "VipsInterpretation_VIPS_INTERPRETATION_XYZ" )
         .allowlist_type( "_VipsImage" )
         .generate()
