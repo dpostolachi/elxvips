@@ -26,7 +26,7 @@ The [package](https://hex.pm/packages/elxvips) can be installed by adding `elxvi
 ```elixir
 def deps do
   [
-    {:elxvips, "~> 0.1.4"}
+    {:elxvips, "~> 0.1.7"}
   ]
 end
 ```
