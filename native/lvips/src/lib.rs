@@ -217,6 +217,7 @@ fn vips_get_image_bytes_format<'a>(env: Env<'a>, bytes: Binary<'a>) -> Result<Te
 }
 
 fn on_load(_env: Env, _info: Term) -> bool {
+    libvips::vips_init();
     let concurrency = match env::var( "VIPS_CONCURRENCY" ) {
         Ok( var ) => match var.parse::<u8>() {
             Ok( num ) => num,
